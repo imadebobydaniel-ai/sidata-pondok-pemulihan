@@ -18,13 +18,13 @@
             overflow: hidden;
             position: relative;
             margin: 0;
-            /* Menggunakan poster_papua.jpg sebagai background utama */
-            background: url('poster_papua.jpg') no-repeat center center fixed;
+            /* Gabungan gambar dan layer gelap transparan untuk kontras maksimal */
+            background: linear-gradient(rgba(15, 23, 42, 0.5), rgba(15, 23, 42, 0.5)), url('poster_papua.jpg') no-repeat center center fixed;
             background-size: cover;
             color: white;
         }
 
-        /* Layer degradasi transparan agar teks tetap tajam di atas gambar */
+        /* Layer degradasi tambahan (Opsional: bisa dihapus jika background di atas sudah cukup gelap) */
         body::before {
             content: "";
             position: absolute;
