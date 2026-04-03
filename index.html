@@ -39,6 +39,11 @@
         .btn-masuk, .btn-submit { background: #2563eb; color: white; border: none; padding: 12px; border-radius: 8px; cursor: pointer; font-weight: bold; width: 100%; }
         .btn-batal { background: #e11d48; color: white; border: none; padding: 8px 15px; border-radius: 8px; cursor: pointer; }
         .status-msg { margin-top: 10px; font-size: 0.9rem; }
+        
+        /* Table Styles */
+        table { width: 100%; border-collapse: collapse; background: rgba(0,0,0,0.5); color: white; border-radius: 10px; overflow: hidden; margin-top: 20px; font-size: 0.9rem; }
+        th { background: #ffc107; color: black; padding: 12px; }
+        td { padding: 10px; border-bottom: 1px solid rgba(255,255,255,0.1); text-align: center; }
     </style>
 </head>
 <body>
@@ -77,7 +82,7 @@
     </div>
 
     <div class="main-container">
-        <section id="welcome-view" style="text-align: center;">
+        <section id="welcome-view">
             <img src="logo_pope.png" style="width: 150px; margin-bottom: 25px; filter: drop-shadow(0 0 15px rgba(255,255,255,0.4));">
             <h1>SELAMAT DATANG</h1>
             <h3>SISTEM INFORMASI PONDOK PEMULIHAN PAPUA</h3>
@@ -110,16 +115,19 @@
             </div>
         </div>
 
-        <div id="database-view" class="hidden"><h2>Database Jemaat (Segera Hadir)</h2></div>
+        <div id="database-view" class="hidden">
+            <h2 style="color: #ffc107; margin-bottom: 20px;">DATABASE JEMAAT</h2>
+            <div id="tabel-container"></div>
+        </div>
     </div>
 
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
-        import { getFirestore, collection, addDoc, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+        import { getFirestore, collection, addDoc, getDocs, query, orderBy, serverTimestamp, deleteDoc, doc } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
 
-        // CONFIG FIREBASE ANDA (Pastikan ini sudah sesuai dengan milik Anda)
+        // CONFIG FIREBASE (Gunakan punya Anda)
         const firebaseConfig = {
-            apiKey: "AIzaSy...",
+            apiKey: "AIzaSy...", 
             authDomain: "pope-apps.firebaseapp.com",
             projectId: "pope-apps",
             storageBucket: "pope-apps.appspot.com",
@@ -130,25 +138,44 @@
         const app = initializeApp(firebaseConfig);
         const db = getFirestore(app);
 
-        // Fungsi Navigasi (Harus di dalam type module agar bisa diakses jika dipicu via ID)
-        window.tampilkanView = (viewId) => {
+        // --- GLOBAL FUNCTIONS UNTUK AKSES LUAR MODULE ---
+        window.tampilkanView = async (viewId) => {
             const views = ['welcome-view', 'input-view', 'database-view'];
             views.forEach(v => document.getElementById(v).classList.add('hidden'));
             document.getElementById(viewId).classList.remove('hidden');
             document.getElementById('menu-list').classList.remove('active');
+
+            if (viewId === 'database-view') {
+                await muatDatabaseJemaat();
+            }
         };
 
         window.toggleMenu = () => {
             document.getElementById('menu-list').classList.toggle('active');
         };
 
-        // Event Listeners untuk Navigasi
+        // Fungsi Hapus Jemaat
+        window.hapusJemaat = async function(id) {
+            if (confirm("Apakah Anda yakin ingin menghapus data jemaat ini?")) {
+                try {
+                    await deleteDoc(doc(db, "jemaat", id));
+                    alert("Data berhasil dihapus!");
+                    await muatDatabaseJemaat(); // Refresh tabel
+                } catch (error) {
+                    console.error("Gagal menghapus:", error);
+                    alert("Gagal menghapus data.");
+                }
+            }
+        };
+
+        // Event Listeners
         document.getElementById('nav-header').onclick = window.toggleMenu;
         document.getElementById('menu-beranda').onclick = () => window.tampilkanView('welcome-view');
         document.getElementById('menu-database').onclick = () => window.tampilkanView('database-view');
         document.getElementById('menu-input').onclick = () => window.tampilkanView('input-view');
         document.getElementById('btn-simpan').onclick = simpanDataJemaat;
 
+        // --- FUNGSI SIMPAN DATA ---
         async function simpanDataJemaat() {
             const nama = document.getElementById('nama_jemaat').value;
             const alamat = document.getElementById('alamat_jemaat').value;
@@ -165,22 +192,18 @@
             const UPLOAD_PRESET = "sidata_upload"; 
 
             statusDiv.innerText = "Mengunggah foto...";
-            
             const formData = new FormData();
             formData.append('file', fotoFile);
             formData.append('upload_preset', UPLOAD_PRESET);
 
             try {
-                // 1. Upload ke Cloudinary
                 const resp = await fetch(`https://api.cloudinary.com/v1_1/${CLOUD_NAME}/image/upload`, {
                     method: 'POST', body: formData
                 });
                 const cloudinaryData = await resp.json();
 
                 if (cloudinaryData.secure_url) {
-                    statusDiv.innerText = "Foto berhasil. Menyimpan data ke Firebase...";
-                    
-                    // 2. Simpan ke Firestore
+                    statusDiv.innerText = "Foto berhasil. Menyimpan ke Database...";
                     await addDoc(collection(db, "jemaat"), {
                         nama_lengkap: nama,
                         alamat: alamat,
@@ -189,16 +212,69 @@
                         dibuat_pada: serverTimestamp()
                     });
 
-                    statusDiv.innerHTML = `<span style="color: #4ade80;">Data Jemaat Berhasil Disimpan!</span>`;
-                    
-                    // Reset Form
+                    statusDiv.innerHTML = `<span style="color: #4ade80;">Data Berhasil Disimpan!</span>`;
                     document.getElementById('nama_jemaat').value = "";
                     document.getElementById('alamat_jemaat').value = "";
                     document.getElementById('foto_input').value = "";
                 }
             } catch (err) {
-                statusDiv.innerText = "Terjadi kesalahan saat menyimpan.";
+                statusDiv.innerText = "Gagal menyimpan data.";
                 console.error(err);
+            }
+        }
+
+        // --- FUNGSI MUAT DATABASE ---
+        async function muatDatabaseJemaat() {
+            const container = document.getElementById('tabel-container');
+            container.innerHTML = `<p>Sedang mengambil data...</p>`;
+
+            try {
+                const q = query(collection(db, "jemaat"), orderBy("dibuat_pada", "desc"));
+                const querySnapshot = await getDocs(q);
+
+                if (querySnapshot.empty) {
+                    container.innerHTML = `<p>Belum ada data jemaat.</p>`;
+                    return;
+                }
+
+                let html = `<table>
+                    <thead>
+                        <tr>
+                            <th>Foto</th>
+                            <th>Nama</th>
+                            <th>Alamat</th>
+                            <th>Status</th>
+                            <th>Aksi</th>
+                        </tr>
+                    </thead>
+                    <tbody>`;
+
+                querySnapshot.forEach((documentSnap) => {
+                    const data = documentSnap.data();
+                    const id = documentSnap.id;
+                    html += `
+                        <tr>
+                            <td><img src="${data.foto_url}" style="width: 45px; height: 45px; border-radius: 50%; object-fit: cover; border: 2px solid #ffc107;"></td>
+                            <td>${data.nama_lengkap}</td>
+                            <td>${data.alamat}</td>
+                            <td>
+                                <span style="background: ${data.status === 'Aktif' ? '#4ade80' : '#f87171'}; padding: 4px 8px; border-radius: 5px; color: black; font-weight: bold; font-size: 0.75rem;">
+                                    ${data.status}
+                                </span>
+                            </td>
+                            <td>
+                                <button onclick="hapusJemaat('${id}')" style="background: #e11d48; color: white; border: none; padding: 6px 10px; border-radius: 5px; cursor: pointer;">
+                                    <i class="fas fa-trash"></i>
+                                </button>
+                            </td>
+                        </tr>`;
+                });
+
+                html += `</tbody></table>`;
+                container.innerHTML = html;
+            } catch (err) {
+                console.error(err);
+                container.innerHTML = `<p style="color: #f87171;">Gagal memuat data.</p>`;
             }
         }
     </script>
@@ -207,10 +283,10 @@
     <script>
         function updateWaktu() {
             const now = new Date();
-            const tgl = document.getElementById('display-date');
-            const jam = document.getElementById('display-clock');
-            if(tgl) tgl.innerText = now.toLocaleDateString('id-ID', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' });
-            if(jam) jam.innerText = now.toLocaleTimeString('id-ID');
+            const dateElem = document.getElementById('display-date');
+            const clockElem = document.getElementById('display-clock');
+            if(dateElem) dateElem.innerText = now.toLocaleDateString('id-ID', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' });
+            if(clockElem) clockElem.innerText = now.toLocaleTimeString('id-ID');
         }
         setInterval(updateWaktu, 1000);
         updateWaktu();
