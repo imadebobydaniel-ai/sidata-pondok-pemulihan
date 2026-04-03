@@ -86,7 +86,7 @@
             <p id="display-date">Memuat...</p>
             <p id="display-clock" style="font-weight: bold; color: #ffc107;">00:00:00</p>
         </div>
-        <h3>PONDOK PEMULIHAN PAPUA</h3>
+        <h3 style="cursor:pointer;" onclick="tampilkanView('welcome-view')">PONDOK PEMULIHAN PAPUA</h3>
         <button onclick="prosesLogout()" class="btn-batal"><i class="fas fa-sign-out-alt"></i> LOGOUT</button>
     </div>
 
@@ -96,6 +96,10 @@
             <div style="border-top: 2px solid #ffc107; border-bottom: 2px solid #ffc107; padding: 15px 0; width: fit-content; min-width: 300px;">
                 <h1 style="color: white; line-height: 1.2;">SELAMAT DATANG</h1>
                 <h3 style="color: #ffc107;">SISTEM INFORMASI PONDOK PEMULIHAN PAPUA</h3>
+            </div>
+            <div style="margin-top: 30px; display: flex; gap: 10px;">
+                <button onclick="tampilkanView('input-view')" style="padding: 10px 20px; background: #ffc107; border: none; border-radius: 5px; cursor: pointer; font-weight: bold;">INPUT DATA</button>
+                <button onclick="tampilkanView('database-view')" style="padding: 10px 20px; background: #ffc107; border: none; border-radius: 5px; cursor: pointer; font-weight: bold;">LIHAT DATABASE</button>
             </div>
         </section>
 
@@ -122,18 +126,19 @@
                     <input type="file" id="foto_input" accept="image/*">
                 </div>
                 <button class="btn-submit" id="btn-simpan">SIMPAN DATA</button>
-                <div id="upload-status"></div>
+                <button onclick="tampilkanView('welcome-view')" style="margin-top:10px; background:none; border:1px solid #ffc107; color:white; padding:5px; cursor:pointer; width:100%; border-radius:8px;">KEMBALI</button>
             </div>
         </div>
 
         <div id="database-view" class="hidden">
             <h2 style="color: #ffc107; margin-bottom: 20px;">DATABASE JEMAAT</h2>
+            <button onclick="tampilkanView('welcome-view')" style="margin-bottom:15px; background:#ffc107; border:none; padding:8px 15px; border-radius:5px; font-weight:bold; cursor:pointer;">KEMBALI KE BERANDA</button>
             <div id="tabel-container"></div>
         </div>
     </div>
 
     <script type="module">
-        /* FIREBASE LOGIC TETAP SAMA */
+        /* LOGIKA FIREBASE */
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
         import { getFirestore, collection, addDoc, getDocs, query, orderBy, serverTimestamp, deleteDoc, doc } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
 
@@ -150,31 +155,56 @@
         const db = getFirestore(app);
         const koleksiRef = collection(db, "Administrator", "profile biodata", "daftar_anggota");
 
+        // FUNGSI PINDAH TAMPILAN TANPA RELOAD
         window.tampilkanView = async (viewId) => {
             const views = ['welcome-view', 'input-view', 'database-view'];
-            views.forEach(v => document.getElementById(v)?.classList.add('hidden'));
+            views.forEach(v => {
+                const el = document.getElementById(v);
+                if(el) el.classList.add('hidden');
+            });
             document.getElementById(viewId).classList.remove('hidden');
             if (viewId === 'database-view') await muatDatabaseJemaat();
         };
 
-        // ... sisanya fungsi simpanDataJemaat, muatDatabaseJemaat, hapusJemaat tetap ada di sini ...
+        // ... (Logika muatDatabaseJemaat & simpanDataJemaat tetap di sini) ...
     </script>
 
     <script>
-        /* LOGIN & WAKTU LOGIC */
         const USER_AKSES = "admin_papua";
         const PASS_AKSES = "Papua2026!";
 
+        // LOGIN: Hanya hilangkan overlay, jangan reload
         document.getElementById('loginForm').onsubmit = function(e) {
             e.preventDefault();
-            if (document.getElementById('username_input').value === USER_AKSES && 
-                document.getElementById('password_input').value === PASS_AKSES) {
+            const user = document.getElementById('username_input').value;
+            const pass = document.getElementById('password_input').value;
+
+            if (user === USER_AKSES && pass === PASS_AKSES) {
                 document.getElementById('login-overlay').classList.add('hidden');
-            } else { alert("Akses Ditolak!"); }
+                // Reset form login agar bersih saat logout nanti
+                this.reset();
+            } else { 
+                alert("Akses Ditolak!"); 
+            }
         };
 
-        window.prosesLogout = () => { if(confirm("Keluar?")) location.reload(); };
+        // LOGOUT: Hanya munculkan overlay kembali, jangan reload
+        window.prosesLogout = () => { 
+            if(confirm("Keluar dari sistem?")) {
+                document.getElementById('login-overlay').classList.remove('hidden');
+                // Kembalikan ke tampilan beranda secara default
+                tampilkanView('welcome-view');
+            } 
+        };
 
+        // TOGGLE MATA PASSWORD
+        document.getElementById('togglePassword').onclick = function() {
+            const passInput = document.getElementById('password_input');
+            passInput.type = passInput.type === 'password' ? 'text' : 'password';
+            this.classList.toggle('fa-eye-slash');
+        };
+
+        // UPDATE WAKTU REAL-TIME
         function updateWaktu() {
             const now = new Date();
             document.getElementById('display-date').innerText = now.toLocaleDateString('id-ID', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' });
