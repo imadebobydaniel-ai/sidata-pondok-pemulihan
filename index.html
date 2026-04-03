@@ -25,11 +25,6 @@
         #login-overlay { position: fixed; inset: 0; background: rgba(15, 23, 42, 0.95); display: flex; justify-content: center; align-items: center; z-index: 100000; }
         .login-card { background: rgba(255, 255, 255, 0.1); padding: 40px; border-radius: 15px; border: 1px solid rgba(255, 255, 255, 0.2); width: 100%; max-width: 400px; text-align: center; backdrop-filter: blur(10px); }
         .login-card input, .form-group input, .form-group select { width: 100%; padding: 12px; margin-top: 5px; margin-bottom: 15px; border-radius: 8px; background: white; color: #1e293b; border: 2px solid #ffc107; }
-        
-        /* Style tambahan untuk posisi icon mata */
-        .password-container { position: relative; width: 100%; }
-        .password-container i { position: absolute; right: 15px; top: 18px; color: #1e293b; cursor: pointer; }
-
         #top-bar-info { position: fixed; top: 0; left: 0; width: 100%; height: 80px; background: rgba(0, 0, 0, 0.7); backdrop-filter: blur(15px); display: flex; align-items: center; justify-content: space-between; padding: 0 30px; border-bottom: 2px solid #ffc107; }
         .navigasi-wrapper { position: fixed; top: 100px; left: 30px; z-index: 10006; }
         .navigasi-header { background: #ffc107; color: black; padding: 10px 20px; border-radius: 5px; cursor: pointer; font-weight: bold; }
@@ -45,6 +40,7 @@
         .btn-batal { background: #e11d48; color: white; border: none; padding: 8px 15px; border-radius: 8px; cursor: pointer; }
         .status-msg { margin-top: 10px; font-size: 0.9rem; }
         
+        /* Table Styles */
         table { width: 100%; border-collapse: collapse; background: rgba(0,0,0,0.5); color: white; border-radius: 10px; overflow: hidden; margin-top: 20px; font-size: 0.9rem; }
         th { background: #ffc107; color: black; padding: 12px; }
         td { padding: 10px; border-bottom: 1px solid rgba(255,255,255,0.1); text-align: center; }
@@ -59,10 +55,12 @@
             <p style="font-size: 0.8rem; margin-bottom: 20px;">Pondok Pemulihan Papua</p>
             
             <form id="loginForm">
-                <input type="text" id="username_input" placeholder="Username" required>
-                <div class="password-container">
-                    <input type="password" id="password_input" placeholder="Password" required>
-                    <i class="fas fa-eye" id="togglePassword"></i>
+                <div style="position: relative;">
+                    <input type="text" id="username_input" placeholder="Username" required>
+                </div>
+                <div style="position: relative;">
+                    <input type="password" id="password_input" placeholder="Password" required style="padding-right: 40px;">
+                    <i class="fas fa-eye" id="togglePassword" style="position: absolute; right: 15px; top: 15px; color: #ffc107; cursor: pointer; z-index: 100;"></i>
                 </div>
                 <button type="submit" class="btn-masuk">MASUK KE SISTEM</button>
             </form>
@@ -146,10 +144,136 @@
         const app = initializeApp(firebaseConfig);
         const db = getFirestore(app);
 
-        // LOGIN LOGIC
+        // --- GLOBAL FUNCTIONS ---
+        window.tampilkanView = async (viewId) => {
+            const views = ['welcome-view', 'input-view', 'database-view'];
+            views.forEach(v => {
+                const el = document.getElementById(v);
+                if(el) el.classList.add('hidden');
+            });
+            document.getElementById(viewId).classList.remove('hidden');
+            document.getElementById('menu-list').classList.remove('active');
+
+            if (viewId === 'database-view') {
+                await muatDatabaseJemaat();
+            }
+        };
+
+        window.toggleMenu = () => {
+            document.getElementById('menu-list').classList.toggle('active');
+        };
+
+        window.hapusJemaat = async function(id) {
+            if (confirm("Apakah Anda yakin ingin menghapus data jemaat ini?")) {
+                try {
+                    await deleteDoc(doc(db, "jemaat", id));
+                    alert("Data berhasil dihapus!");
+                    await muatDatabaseJemaat();
+                } catch (error) {
+                    console.error("Gagal menghapus:", error);
+                }
+            }
+        };
+
+        // Event Listeners Navigasi
+        document.getElementById('nav-header').onclick = window.toggleMenu;
+        document.getElementById('menu-beranda').onclick = () => window.tampilkanView('welcome-view');
+        document.getElementById('menu-database').onclick = () => window.tampilkanView('database-view');
+        document.getElementById('menu-input').onclick = () => window.tampilkanView('input-view');
+        document.getElementById('btn-simpan').onclick = simpanDataJemaat;
+
+        // --- FUNGSI SIMPAN DATA ---
+        async function simpanDataJemaat() {
+            const nama = document.getElementById('nama_jemaat').value;
+            const alamat = document.getElementById('alamat_jemaat').value;
+            const status = document.getElementById('status_jemaat').value;
+            const fotoFile = document.getElementById('foto_input').files[0];
+            const statusDiv = document.getElementById('upload-status');
+
+            if (!nama || !fotoFile) {
+                alert("Mohon isi Nama dan Pilih Foto!");
+                return;
+            }
+
+            const CLOUD_NAME = "dxzllsbgi"; 
+            const UPLOAD_PRESET = "sidata_upload"; 
+
+            statusDiv.innerText = "Mengunggah foto...";
+            const formData = new FormData();
+            formData.append('file', fotoFile);
+            formData.append('upload_preset', UPLOAD_PRESET);
+
+            try {
+                const resp = await fetch(`https://api.cloudinary.com/v1_1/${CLOUD_NAME}/image/upload`, {
+                    method: 'POST', body: formData
+                });
+                const cloudinaryData = await resp.json();
+
+                if (cloudinaryData.secure_url) {
+                    statusDiv.innerText = "Foto berhasil. Menyimpan ke Database...";
+                    await addDoc(collection(db, "jemaat"), {
+                        nama_lengkap: nama,
+                        alamat: alamat,
+                        status: status,
+                        foto_url: cloudinaryData.secure_url,
+                        dibuat_pada: serverTimestamp()
+                    });
+
+                    statusDiv.innerHTML = `<span style="color: #4ade80;">Data Berhasil Disimpan!</span>`;
+                    document.getElementById('nama_jemaat').value = "";
+                    document.getElementById('alamat_jemaat').value = "";
+                    document.getElementById('foto_input').value = "";
+                }
+            } catch (err) {
+                statusDiv.innerText = "Gagal menyimpan data.";
+                console.error(err);
+            }
+        }
+
+        // --- FUNGSI MUAT DATABASE ---
+        async function muatDatabaseJemaat() {
+            const container = document.getElementById('tabel-container');
+            container.innerHTML = `<p>Sedang mengambil data...</p>`;
+
+            try {
+                const q = query(collection(db, "jemaat"), orderBy("dibuat_pada", "desc"));
+                const querySnapshot = await getDocs(q);
+
+                if (querySnapshot.empty) {
+                    container.innerHTML = `<p>Belum ada data jemaat.</p>`;
+                    return;
+                }
+
+                let html = `<table><thead><tr><th>Foto</th><th>Nama</th><th>Alamat</th><th>Status</th><th>Aksi</th></tr></thead><tbody>`;
+
+                querySnapshot.forEach((documentSnap) => {
+                    const data = documentSnap.data();
+                    const id = documentSnap.id;
+                    html += `
+                        <tr>
+                            <td><img src="${data.foto_url}" style="width: 45px; height: 45px; border-radius: 50%; object-fit: cover; border: 2px solid #ffc107;"></td>
+                            <td>${data.nama_lengkap}</td>
+                            <td>${data.alamat}</td>
+                            <td><span style="background: ${data.status === 'Aktif' ? '#4ade80' : '#f87171'}; padding: 4px 8px; border-radius: 5px; color: black; font-weight: bold; font-size: 0.75rem;">${data.status}</span></td>
+                            <td><button onclick="hapusJemaat('${id}')" style="background: #e11d48; color: white; border: none; padding: 6px 10px; border-radius: 5px; cursor: pointer;"><i class="fas fa-trash"></i></button></td>
+                        </tr>`;
+                });
+
+                html += `</tbody></table>`;
+                container.innerHTML = html;
+            } catch (err) {
+                console.error(err);
+                container.innerHTML = `<p style="color: #f87171;">Gagal memuat data.</p>`;
+            }
+        }
+    </script>
+
+    <script>
+        // PENGATURAN AKSES
         const USER_AKSES = "admin_papua";
         const PASS_AKSES = "Papua2026!";
 
+        // Toggle Mata (Show/Hide Password)
         const togglePassword = document.querySelector('#togglePassword');
         const passwordInput = document.querySelector('#password_input');
 
@@ -161,6 +285,7 @@
             });
         }
 
+        // Proses Login
         document.getElementById('loginForm').addEventListener('submit', function(e) {
             e.preventDefault();
             const userIn = document.getElementById('username_input').value;
@@ -174,95 +299,20 @@
             }
         });
 
+        // Fungsi Logout
         window.prosesLogout = function() {
             if(confirm("Apakah Anda ingin keluar?")) {
-                location.reload();
+                location.reload(); 
             }
         }
 
-        // NAVIGATION & FIREBASE LOGIC
-        window.tampilkanView = async (viewId) => {
-            const views = ['welcome-view', 'input-view', 'database-view'];
-            views.forEach(v => document.getElementById(v).classList.add('hidden'));
-            document.getElementById(viewId).classList.remove('hidden');
-            document.getElementById('menu-list').classList.remove('active');
-            if (viewId === 'database-view') await muatDatabaseJemaat();
-        };
-
-        window.toggleMenu = () => document.getElementById('menu-list').classList.toggle('active');
-
-        window.hapusJemaat = async function(id) {
-            if (confirm("Apakah Anda yakin ingin menghapus data jemaat ini?")) {
-                try {
-                    await deleteDoc(doc(db, "jemaat", id));
-                    alert("Data berhasil dihapus!");
-                    await muatDatabaseJemaat();
-                } catch (error) { console.error(error); }
-            }
-        };
-
-        document.getElementById('nav-header').onclick = window.toggleMenu;
-        document.getElementById('menu-beranda').onclick = () => window.tampilkanView('welcome-view');
-        document.getElementById('menu-database').onclick = () => window.tampilkanView('database-view');
-        document.getElementById('menu-input').onclick = () => window.tampilkanView('input-view');
-        document.getElementById('btn-simpan').onclick = simpanDataJemaat;
-
-        async function simpanDataJemaat() {
-            const nama = document.getElementById('nama_jemaat').value;
-            const alamat = document.getElementById('alamat_jemaat').value;
-            const status = document.getElementById('status_jemaat').value;
-            const fotoFile = document.getElementById('foto_input').files[0];
-            const statusDiv = document.getElementById('upload-status');
-
-            if (!nama || !fotoFile) { alert("Isi Nama & Foto!"); return; }
-
-            statusDiv.innerText = "Mengunggah...";
-            const formData = new FormData();
-            formData.append('file', fotoFile);
-            formData.append('upload_preset', "sidata_upload");
-
-            try {
-                const resp = await fetch(`https://api.cloudinary.com/v1_1/dxzllsbgi/image/upload`, { method: 'POST', body: formData });
-                const cloud = await resp.json();
-                if (cloud.secure_url) {
-                    await addDoc(collection(db, "jemaat"), {
-                        nama_lengkap: nama, alamat: alamat, status: status,
-                        foto_url: cloud.secure_url, dibuat_pada: serverTimestamp()
-                    });
-                    statusDiv.innerHTML = "Berhasil!";
-                    document.getElementById('nama_jemaat').value = "";
-                    document.getElementById('foto_input').value = "";
-                }
-            } catch (err) { statusDiv.innerText = "Gagal!"; }
-        }
-
-        async function muatDatabaseJemaat() {
-            const container = document.getElementById('tabel-container');
-            container.innerHTML = "Memuat...";
-            try {
-                const q = query(collection(db, "jemaat"), orderBy("dibuat_pada", "desc"));
-                const snap = await getDocs(q);
-                let html = `<table><thead><tr><th>Foto</th><th>Nama</th><th>Alamat</th><th>Status</th><th>Aksi</th></tr></thead><tbody>`;
-                snap.forEach(d => {
-                    const item = d.data();
-                    html += `<tr>
-                        <td><img src="${item.foto_url}" style="width:40px;height:40px;border-radius:50%;object-fit:cover;"></td>
-                        <td>${item.nama_lengkap}</td>
-                        <td>${item.alamat}</td>
-                        <td>${item.status}</td>
-                        <td><button onclick="hapusJemaat('${d.id}')" style="background:red;color:white;border:none;padding:5px;border-radius:3px;cursor:pointer;"><i class="fas fa-trash"></i></button></td>
-                    </tr>`;
-                });
-                container.innerHTML = html + "</tbody></table>";
-            } catch (e) { container.innerHTML = "Error!"; }
-        }
-    </script>
-
-    <script>
+        // Update Waktu Real-time
         function updateWaktu() {
             const now = new Date();
-            document.getElementById('display-date').innerText = now.toLocaleDateString('id-ID', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' });
-            document.getElementById('display-clock').innerText = now.toLocaleTimeString('id-ID');
+            const dateElem = document.getElementById('display-date');
+            const clockElem = document.getElementById('display-clock');
+            if(dateElem) dateElem.innerText = now.toLocaleDateString('id-ID', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' });
+            if(clockElem) clockElem.innerText = now.toLocaleTimeString('id-ID');
         }
         setInterval(updateWaktu, 1000);
         updateWaktu();
