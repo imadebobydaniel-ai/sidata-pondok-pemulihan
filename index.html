@@ -21,26 +21,61 @@
             background: linear-gradient(to bottom, rgba(15, 23, 42, 0.4) 0%, rgba(15, 23, 42, 0.2) 50%, rgba(15, 23, 42, 0.7) 100%);
             z-index: 0;
         }
-        #top-bar-info, .navigasi-wrapper, .main-container { position: relative; z-index: 10; }
+
+        /* CONTAINER UTAMA SIMETRIS */
+        .main-container {
+            position: fixed;
+            top: 80px;
+            width: 100%;
+            height: calc(100% - 80px);
+            padding: 20px;
+            overflow-y: auto;
+            display: flex;
+            flex-direction: column;
+            align-items: center; 
+            justify-content: center; /* Konten benar-benar di tengah layar */
+            z-index: 10;
+        }
+
+        /* LOGIN STYLES */
         #login-overlay { position: fixed; inset: 0; background: rgba(15, 23, 42, 0.95); display: flex; justify-content: center; align-items: center; z-index: 100000; }
         .login-card { background: rgba(255, 255, 255, 0.1); padding: 40px; border-radius: 15px; border: 1px solid rgba(255, 255, 255, 0.2); width: 100%; max-width: 400px; text-align: center; backdrop-filter: blur(10px); }
         .login-card input, .form-group input, .form-group select { width: 100%; padding: 12px; margin-top: 5px; margin-bottom: 15px; border-radius: 8px; background: white; color: #1e293b; border: 2px solid #ffc107; }
-        #top-bar-info { position: fixed; top: 0; left: 0; width: 100%; height: 80px; background: rgba(0, 0, 0, 0.7); backdrop-filter: blur(15px); display: flex; align-items: center; justify-content: space-between; padding: 0 30px; border-bottom: 2px solid #ffc107; }
+        
+        /* TOP BAR & NAV */
+        #top-bar-info { position: fixed; top: 0; left: 0; width: 100%; height: 80px; background: rgba(0, 0, 0, 0.7); backdrop-filter: blur(15px); display: flex; align-items: center; justify-content: space-between; padding: 0 30px; border-bottom: 2px solid #ffc107; z-index: 100; }
         .navigasi-wrapper { position: fixed; top: 100px; left: 30px; z-index: 10006; }
         .navigasi-header { background: #ffc107; color: black; padding: 10px 20px; border-radius: 5px; cursor: pointer; font-weight: bold; }
         .menu-content { list-style: none; display: none; background: rgba(0, 0, 0, 0.9); padding: 15px; border-radius: 10px; margin-top: 10px; }
         .menu-content.active { display: flex; flex-direction: column; gap: 10px; }
         .menu-content a { color: white; text-decoration: none; font-size: 14px; }
         .menu-content a:hover { color: #ffc107; }
-        .main-container { position: fixed; top: 80px; width: 100%; height: calc(100% - 80px); padding: 40px; overflow-y: auto; display: flex; flex-direction: column; align-items: center; }
+
+        /* WELCOME VIEW STYLES */
+        #welcome-view {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            text-align: center;
+            width: 100%;
+        }
+        #welcome-view h1 {
+            margin: 10px 0;
+            font-size: 2.5rem;
+        }
+        #welcome-view h3 {
+            margin: 0;
+            font-weight: 400;
+            letter-spacing: 1px;
+        }
+
+        /* FORM & TABLE */
         .hidden { display: none !important; }
         .card-form { background: rgba(0, 0, 0, 0.6); padding: 30px; border-radius: 15px; width: 100%; max-width: 600px; border: 1px solid #ffc107; }
         .form-group { text-align: left; margin-bottom: 10px; }
         .btn-masuk, .btn-submit { background: #2563eb; color: white; border: none; padding: 12px; border-radius: 8px; cursor: pointer; font-weight: bold; width: 100%; }
         .btn-batal { background: #e11d48; color: white; border: none; padding: 8px 15px; border-radius: 8px; cursor: pointer; }
-        .status-msg { margin-top: 10px; font-size: 0.9rem; }
         
-        /* Table Styles */
         table { width: 100%; border-collapse: collapse; background: rgba(0,0,0,0.5); color: white; border-radius: 10px; overflow: hidden; margin-top: 20px; font-size: 0.9rem; }
         th { background: #ffc107; color: black; padding: 12px; }
         td { padding: 10px; border-bottom: 1px solid rgba(255,255,255,0.1); text-align: center; }
@@ -89,9 +124,11 @@
 
     <div class="main-container">
         <section id="welcome-view">
-            <img src="logo_pope.png" style="width: 150px; margin-bottom: 25px; filter: drop-shadow(0 0 15px rgba(255,255,255,0.4));">
-            <h1>SELAMAT DATANG</h1>
-            <h3>SISTEM INFORMASI PONDOK PEMULIHAN PAPUA</h3>
+            <img src="logo_pope.png" style="width: 150px; height: auto; margin-bottom: 20px; filter: drop-shadow(0 0 15px rgba(255,255,255,0.4));">
+            <div style="border-top: 2px solid #ffc107; border-bottom: 2px solid #ffc107; padding: 15px 0; width: fit-content; min-width: 300px;">
+                <h1 style="color: white; line-height: 1.2;">SELAMAT DATANG</h1>
+                <h3 style="color: #ffc107;">SISTEM INFORMASI PONDOK PEMULIHAN PAPUA</h3>
+            </div>
         </section>
 
         <div id="input-view" class="hidden">
@@ -144,7 +181,7 @@
         const app = initializeApp(firebaseConfig);
         const db = getFirestore(app);
 
-        // --- GLOBAL FUNCTIONS ---
+        // --- NAVIGATION & VIEWS ---
         window.tampilkanView = async (viewId) => {
             const views = ['welcome-view', 'input-view', 'database-view'];
             views.forEach(v => {
@@ -153,166 +190,103 @@
             });
             document.getElementById(viewId).classList.remove('hidden');
             document.getElementById('menu-list').classList.remove('active');
-
-            if (viewId === 'database-view') {
-                await muatDatabaseJemaat();
-            }
+            if (viewId === 'database-view') await muatDatabaseJemaat();
         };
 
-        window.toggleMenu = () => {
-            document.getElementById('menu-list').classList.toggle('active');
-        };
+        window.toggleMenu = () => document.getElementById('menu-list').classList.toggle('active');
 
-        window.hapusJemaat = async function(id) {
-            if (confirm("Apakah Anda yakin ingin menghapus data jemaat ini?")) {
-                try {
-                    await deleteDoc(doc(db, "jemaat", id));
-                    alert("Data berhasil dihapus!");
-                    await muatDatabaseJemaat();
-                } catch (error) {
-                    console.error("Gagal menghapus:", error);
-                }
-            }
-        };
-
-        // Event Listeners Navigasi
+        // Event Listeners
         document.getElementById('nav-header').onclick = window.toggleMenu;
         document.getElementById('menu-beranda').onclick = () => window.tampilkanView('welcome-view');
         document.getElementById('menu-database').onclick = () => window.tampilkanView('database-view');
         document.getElementById('menu-input').onclick = () => window.tampilkanView('input-view');
         document.getElementById('btn-simpan').onclick = simpanDataJemaat;
 
-        // --- FUNGSI SIMPAN DATA ---
+        // --- FIREBASE LOGIC ---
         async function simpanDataJemaat() {
             const nama = document.getElementById('nama_jemaat').value;
-            const alamat = document.getElementById('alamat_jemaat').value;
-            const status = document.getElementById('status_jemaat').value;
             const fotoFile = document.getElementById('foto_input').files[0];
             const statusDiv = document.getElementById('upload-status');
+            if (!nama || !fotoFile) { alert("Isi Nama & Pilih Foto!"); return; }
 
-            if (!nama || !fotoFile) {
-                alert("Mohon isi Nama dan Pilih Foto!");
-                return;
-            }
-
-            const CLOUD_NAME = "dxzllsbgi"; 
-            const UPLOAD_PRESET = "sidata_upload"; 
-
-            statusDiv.innerText = "Mengunggah foto...";
+            statusDiv.innerText = "Mengunggah...";
             const formData = new FormData();
             formData.append('file', fotoFile);
-            formData.append('upload_preset', UPLOAD_PRESET);
+            formData.append('upload_preset', "sidata_upload");
 
             try {
-                const resp = await fetch(`https://api.cloudinary.com/v1_1/${CLOUD_NAME}/image/upload`, {
-                    method: 'POST', body: formData
-                });
-                const cloudinaryData = await resp.json();
-
-                if (cloudinaryData.secure_url) {
-                    statusDiv.innerText = "Foto berhasil. Menyimpan ke Database...";
+                const resp = await fetch(`https://api.cloudinary.com/v1_1/dxzllsbgi/image/upload`, { method: 'POST', body: formData });
+                const cloud = await resp.json();
+                if (cloud.secure_url) {
                     await addDoc(collection(db, "jemaat"), {
                         nama_lengkap: nama,
-                        alamat: alamat,
-                        status: status,
-                        foto_url: cloudinaryData.secure_url,
+                        alamat: document.getElementById('alamat_jemaat').value,
+                        status: document.getElementById('status_jemaat').value,
+                        foto_url: cloud.secure_url,
                         dibuat_pada: serverTimestamp()
                     });
-
-                    statusDiv.innerHTML = `<span style="color: #4ade80;">Data Berhasil Disimpan!</span>`;
+                    statusDiv.innerHTML = "Berhasil!";
                     document.getElementById('nama_jemaat').value = "";
-                    document.getElementById('alamat_jemaat').value = "";
                     document.getElementById('foto_input').value = "";
                 }
-            } catch (err) {
-                statusDiv.innerText = "Gagal menyimpan data.";
-                console.error(err);
-            }
+            } catch (err) { statusDiv.innerText = "Gagal!"; console.error(err); }
         }
 
-        // --- FUNGSI MUAT DATABASE ---
         async function muatDatabaseJemaat() {
             const container = document.getElementById('tabel-container');
-            container.innerHTML = `<p>Sedang mengambil data...</p>`;
-
+            container.innerHTML = "Memuat...";
             try {
                 const q = query(collection(db, "jemaat"), orderBy("dibuat_pada", "desc"));
-                const querySnapshot = await getDocs(q);
-
-                if (querySnapshot.empty) {
-                    container.innerHTML = `<p>Belum ada data jemaat.</p>`;
-                    return;
-                }
-
+                const snap = await getDocs(q);
                 let html = `<table><thead><tr><th>Foto</th><th>Nama</th><th>Alamat</th><th>Status</th><th>Aksi</th></tr></thead><tbody>`;
-
-                querySnapshot.forEach((documentSnap) => {
-                    const data = documentSnap.data();
-                    const id = documentSnap.id;
-                    html += `
-                        <tr>
-                            <td><img src="${data.foto_url}" style="width: 45px; height: 45px; border-radius: 50%; object-fit: cover; border: 2px solid #ffc107;"></td>
-                            <td>${data.nama_lengkap}</td>
-                            <td>${data.alamat}</td>
-                            <td><span style="background: ${data.status === 'Aktif' ? '#4ade80' : '#f87171'}; padding: 4px 8px; border-radius: 5px; color: black; font-weight: bold; font-size: 0.75rem;">${data.status}</span></td>
-                            <td><button onclick="hapusJemaat('${id}')" style="background: #e11d48; color: white; border: none; padding: 6px 10px; border-radius: 5px; cursor: pointer;"><i class="fas fa-trash"></i></button></td>
-                        </tr>`;
+                snap.forEach(docSnap => {
+                    const data = docSnap.data();
+                    html += `<tr>
+                        <td><img src="${data.foto_url}" style="width:40px;height:40px;border-radius:50%;object-fit:cover;"></td>
+                        <td>${data.nama_lengkap}</td>
+                        <td>${data.alamat}</td>
+                        <td>${data.status}</td>
+                        <td><button onclick="hapusJemaat('${docSnap.id}')" style="background:#e11d48;color:white;border:none;padding:5px;cursor:pointer;"><i class="fas fa-trash"></i></button></td>
+                    </tr>`;
                 });
-
-                html += `</tbody></table>`;
-                container.innerHTML = html;
-            } catch (err) {
-                console.error(err);
-                container.innerHTML = `<p style="color: #f87171;">Gagal memuat data.</p>`;
-            }
+                container.innerHTML = html + "</tbody></table>";
+            } catch (e) { container.innerHTML = "Gagal memuat."; }
         }
+
+        window.hapusJemaat = async (id) => {
+            if(confirm("Hapus data?")) {
+                await deleteDoc(doc(db, "jemaat", id));
+                muatDatabaseJemaat();
+            }
+        };
     </script>
 
     <script>
-        // PENGATURAN AKSES
+        // AUTH & UI LOGIC
         const USER_AKSES = "admin_papua";
         const PASS_AKSES = "Papua2026!";
 
-        // Toggle Mata (Show/Hide Password)
-        const togglePassword = document.querySelector('#togglePassword');
-        const passwordInput = document.querySelector('#password_input');
+        document.getElementById('togglePassword').onclick = function() {
+            const passInput = document.getElementById('password_input');
+            const type = passInput.type === 'password' ? 'text' : 'password';
+            passInput.type = type;
+            this.classList.toggle('fa-eye-slash');
+        };
 
-        if (togglePassword) {
-            togglePassword.addEventListener('click', function () {
-                const type = passwordInput.getAttribute('type') === 'password' ? 'text' : 'password';
-                passwordInput.setAttribute('type', type);
-                this.classList.toggle('fa-eye-slash');
-            });
-        }
-
-        // Proses Login
-        document.getElementById('loginForm').addEventListener('submit', function(e) {
+        document.getElementById('loginForm').onsubmit = function(e) {
             e.preventDefault();
-            const userIn = document.getElementById('username_input').value;
-            const passIn = document.getElementById('password_input').value;
-
-            if (userIn === USER_AKSES && passIn === PASS_AKSES) {
+            if (document.getElementById('username_input').value === USER_AKSES && 
+                document.getElementById('password_input').value === PASS_AKSES) {
                 document.getElementById('login-overlay').classList.add('hidden');
-                alert("Login Berhasil! Selamat Datang.");
-            } else {
-                alert("Username atau Password Salah!");
-            }
-        });
+            } else { alert("Akses Ditolak!"); }
+        };
 
-        // Fungsi Logout
-        window.prosesLogout = function() {
-            if(confirm("Apakah Anda ingin keluar?")) {
-                location.reload(); 
-            }
-        }
+        window.prosesLogout = () => { if(confirm("Keluar?")) location.reload(); };
 
-        // Update Waktu Real-time
         function updateWaktu() {
             const now = new Date();
-            const dateElem = document.getElementById('display-date');
-            const clockElem = document.getElementById('display-clock');
-            if(dateElem) dateElem.innerText = now.toLocaleDateString('id-ID', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' });
-            if(clockElem) clockElem.innerText = now.toLocaleTimeString('id-ID');
+            document.getElementById('display-date').innerText = now.toLocaleDateString('id-ID', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' });
+            document.getElementById('display-clock').innerText = now.toLocaleTimeString('id-ID');
         }
         setInterval(updateWaktu, 1000);
         updateWaktu();
