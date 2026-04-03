@@ -165,9 +165,9 @@
                 return;
             }
 
-            // GANTI INI DENGAN DATA DASHBOARD CLOUDINARY ANDA
-            const CLOUD_NAME = "NAMA_CLOUD_ANDA"; 
-            const UPLOAD_PRESET = "PRESET_ANDA"; 
+            // DATA CLOUDINARY ANDA BERDASARKAN GAMBAR
+            const CLOUD_NAME = "dxzllsbgi"; 
+            const UPLOAD_PRESET = "sidata_upload"; 
 
             statusDiv.innerText = "Sedang mengunggah foto...";
             
@@ -177,17 +177,24 @@
 
             try {
                 const resp = await fetch(`https://api.cloudinary.com/v1_1/${CLOUD_NAME}/image/upload`, {
-                    method: 'POST', body: formData
+                    method: 'POST', 
+                    body: formData
                 });
+                
                 const data = await resp.json();
 
                 if (data.secure_url) {
-                    statusDiv.innerHTML = `<span style="color: #4ade80;">Berhasil! Foto tersimpan di: ${data.secure_url}</span>`;
-                    console.log("Simpan URL ini ke Firebase:", data.secure_url);
-                    // Disini nanti kita tambahkan kode Firebase Firestore
+                    statusDiv.innerHTML = `<span style="color: #4ade80;">Berhasil! Foto tersimpan.</span>`;
+                    console.log("URL untuk Firebase:", data.secure_url);
+                    
+                    // ALERT UNTUK TES
+                    alert("Berhasil Unggah! Link Foto: " + data.secure_url);
+                } else {
+                    statusDiv.innerText = "Gagal: " + (data.error ? data.error.message : "Terjadi kesalahan");
                 }
             } catch (err) {
-                statusDiv.innerText = "Gagal mengunggah foto.";
+                statusDiv.innerText = "Gagal menyambung ke server.";
+                console.error(err);
             }
         }
 
