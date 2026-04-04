@@ -28,6 +28,7 @@
             width: 100%; padding: 12px; border-radius: 8px; border: 1px solid #475569; background: #0f172a; color: white; outline: none;
         }
         input:focus, select:focus { border-color: var(--primary); }
+        input[readonly] { background: #1e293b; color: var(--primary); font-weight: bold; border: 1px dashed var(--primary); }
 
         .profile-section { text-align: center; margin-bottom: 40px; }
         .profile-img { width: 150px; height: 150px; border-radius: 50%; border: 4px solid var(--primary); object-fit: cover; margin-bottom: 15px; }
@@ -44,7 +45,7 @@
         }
         .btn-action:disabled { background: #475569; cursor: not-allowed; opacity: 0.6; }
 
-        .sub-group { background: rgba(255, 193, 7, 0.05); padding: 20px; border-radius: 10px; margin-top: 10px; border: 1px solid rgba(255,193,7,0.1); }
+        .sub-group { background: rgba(255, 193, 7, 0.05); padding: 20px; border-radius: 10px; margin-top: 10px; border: 1px solid rgba(255, 193, 7, 0.1); }
         .mandatory { color: var(--error); }
     </style>
 </head>
@@ -71,6 +72,12 @@
                 </div>
             </div>
 
+            <h2><i class="fas fa-id-badge"></i> Registrasi Sistem</h2>
+            <div class="form-group">
+                <label>Nomor Induk Jemaat (Otomatis)</label>
+                <input type="text" id="nij_display" name="nij" readonly>
+            </div>
+
             <h2><i class="fas fa-address-card"></i> Identitas Pribadi</h2>
             <div class="form-group">
                 <label>Nama Lengkap <span class="mandatory">*</span></label>
@@ -78,7 +85,7 @@
             </div>
 
             <div class="grid-2">
-                <div class="form-group"><label>Alamat Tempat Tinggal (KTP)</label><textarea name="alt_ktp" rows="2"></textarea></div>
+                <div class="form-group"><label>Alamat KTP</label><textarea name="alt_ktp" rows="2"></textarea></div>
                 <div class="form-group"><label>Alamat Domisili</label><textarea name="alt_dom" rows="2"></textarea></div>
             </div>
 
@@ -88,22 +95,16 @@
                     <label><input type="radio" name="st_nikah" value="Single" onclick="toggleMarriage(false)" required> Single</label>
                     <label><input type="radio" name="st_nikah" value="Menikah" onclick="toggleMarriage(true)"> Menikah</label>
                     <label><input type="radio" name="st_nikah" value="Duda_Mati" onclick="toggleMarriage(false)"> Duda (Cerai Mati)</label>
-                    <label><input type="radio" name="st_nikah" value="Duda_Hidup" onclick="toggleMarriage(false)"> Duda (Cerai Hidup)</label>
                     <label><input type="radio" name="st_nikah" value="Janda_Mati" onclick="toggleMarriage(false)"> Janda (Cerai Mati)</label>
-                    <label><input type="radio" name="st_nikah" value="Relationship" onclick="toggleMarriage(false)"> Relationship</label>
                 </div>
             </div>
 
             <div id="form-pasangan" class="sub-group hidden">
-                <label>Detail Pasangan</label>
+                <label>Data Pasangan</label>
                 <div class="grid-2">
-                    <select id="pilih_p" onchange="updatePasanganLabel()">
-                        <option value="Suami">Suami</option>
-                        <option value="Istri">Istri</option>
-                    </select>
-                    <input type="text" id="nama_p" placeholder="Nama Suami / Istri" oninput="updatePasanganLabel()">
+                    <select id="pilih_p"><option value="Suami">Suami</option><option value="Istri">Istri</option></select>
+                    <input type="text" id="nama_p" placeholder="Nama Pasangan">
                 </div>
-                <p id="hasil-p" style="margin-top:10px; font-size:1.1rem;"></p>
             </div>
 
             <div class="grid-2">
@@ -115,24 +116,22 @@
                 <label>Pekerjaan <span class="mandatory">*</span></label>
                 <select required id="pekerjaan">
                     <option value="">-- Pilih Pekerjaan --</option>
-                    <option>TNI</option><option>Polri</option><option>ASN</option><option>P3K</option><option>Honorer</option>
-                    <option>Swasta</option><option>Wiraswasta</option><option>Profesional</option><option>Guru</option>
-                    <option>Dosen</option><option>Pejabat Publik</option><option>Pejabat Eksekutif</option><option>Bidang Kerohaniaan</option>
+                    <option>TNI</option><option>Polri</option><option>ASN</option><option>Swasta</option><option>Wiraswasta</option>
+                    <option>Profesional</option><option>Guru/Dosen</option><option>Pejabat Publik</option><option>Kerohaniaan</option>
                 </select>
             </div>
 
             <div class="grid-2">
                 <div class="form-group"><label>Jumlah Anak</label><input type="number" id="jml_anak" min="0" oninput="genAnak(this.value)"></div>
-                <div class="form-group"><label>Total Serumah</label><input type="number"></div>
+                <div class="form-group"><label>Golongan Darah</label>
+                    <select><option>O</option><option>A</option><option>B</option><option>AB</option></select>
+                </div>
             </div>
             <div id="list-anak" class="form-group"></div>
 
             <div class="grid-2">
-                <div class="form-group">
-                    <label>Golongan Darah</label>
-                    <select><option>O</option><option>A</option><option>B</option><option>AB</option></select>
-                </div>
-                <div class="form-group"><label>No. WA</label><input type="text"></div>
+                <div class="form-group"><label>No. WA</label><input type="text" placeholder="0812..."></div>
+                <div class="form-group"><label>Email</label><input type="email"></div>
             </div>
 
             <h2><i class="fas fa-church"></i> Data Gerejawi</h2>
@@ -140,15 +139,15 @@
                 <div class="form-group">
                     <label>Lokasi Berjemaat</label>
                     <select>
-                        <option>Pondok pemulihan Abepura</option><option>Pondok pemulihan Sentani</option>
-                        <option>Pondok pemulihan Doyo</option><option>Pondok pemulihan Arso 1</option><option>Pondok pemulihan Arso 2</option>
+                        <option>Pondok Pemulihan Abepura</option><option>Pondok Pemulihan Sentani</option>
+                        <option>Pondok Pemulihan Doyo</option><option>Pondok Pemulihan Arso</option>
                     </select>
                 </div>
                 <div class="form-group">
                     <label>Aktif dalam Komsel</label>
                     <select>
-                        <option>Komsel lansia</option><option>Komsel bapak</option><option>Komsel ibu</option>
-                        <option>Komsel profesi</option><option>Komsel mahasiswa</option><option>Komsel pelajar</option>
+                        <option>Komsel Lansia</option><option>Komsel Bapak</option><option>Komsel Ibu</option>
+                        <option>Komsel Profesi</option><option>Komsel Mahasiswa</option><option>Komsel Pelajar</option>
                     </select>
                 </div>
             </div>
@@ -157,37 +156,33 @@
                 <label>Jabatan Pelayanan Utama</label>
                 <select id="jabatan" onchange="handlePelayanan(this.value)">
                     <option value="Jemaat">Jemaat Ordinari</option>
-                    <option value="Gembala">Gembala Sidang / Wakil Gembala Sidang</option>
+                    <option value="Gembala">Gembala Sidang / Wakil</option>
                     <option value="Sekertaris">Sekertaris Gereja</option>
                     <option value="Bendahara">Bendahara Gereja</option>
                     <option value="Koordinator">Koordinator / Pemimpin</option>
-                    <option value="KoordinatorBidang">Koordinator Bidang</option>
-                    <option value="PKS">PKS Komsel</option>
-                    <option value="Pendoa">Pelayanan Doa Syafaat Spesifik</option>
-                    <option value="Penatua">Penatua / Diaken</option>
                     <option value="Musik">Pelayanan Musik Spesifik</option>
                     <option value="Vocal">Vocal & Singers Spesifik</option>
                     <option value="Multimedia">Multimedia Spesifik</option>
                     <option value="Sound">Sound & Elektrikal Spesifik</option>
                     <option value="Tamborin">Tamborin & Flags Spesifik</option>
                     <option value="User">User Spesifik</option>
+                    <option value="Doa">Pelayanan Doa Syafaat Spesifik</option>
                     <option value="Misi">Bidang Misi Spesifik</option>
-                    <option value="Parkir">Perparkiran & Keamanan Spesifik</option>
+                    <option value="Keamanan">Perparkiran & Keamanan Spesifik</option>
                 </select>
             </div>
 
             <div id="sub-box" class="sub-group hidden">
-                <label id="sub-label" style="color: var(--primary);">Detail Sub Pelayanan</label>
+                <label id="sub-label">Detail Bidang</label>
                 <select id="sub-select"></select>
             </div>
 
-            <h2><i class="fas fa-file-upload"></i> Upload Dokumen <small class="mandatory">(Wajib)</small></h2>
+            <h2><i class="fas fa-file-upload"></i> Dokumen <small class="mandatory">(Wajib)</small></h2>
             <div class="grid-2">
                 <label class="upload-box" id="box-ktp-file">Upload KTP <input type="file" class="hidden" required onchange="handleFile(this, null, 'box-ktp-file')"></label>
                 <label class="upload-box" id="box-kk-file">Upload KK <input type="file" class="hidden" required onchange="handleFile(this, null, 'box-kk-file')"></label>
                 <label class="upload-box" id="box-akta-file">Akta Lahir <input type="file" class="hidden" required onchange="handleFile(this, null, 'box-akta-file')"></label>
                 <label class="upload-box" id="box-baptis-file">Surat Baptis <input type="file" class="hidden" required onchange="handleFile(this, null, 'box-baptis-file')"></label>
-                <label class="upload-box" id="box-nikah-file">Surat Nikah (Opsional) <input type="file" id="inp-nikah" class="hidden" onchange="handleFile(this, null, 'box-nikah-file')"></label>
             </div>
 
             <button type="submit" id="btnSubmit" class="btn-action">SIMPAN DATA JEMAAT</button>
@@ -196,6 +191,38 @@
 </div>
 
 <script>
+    // Penomoran Otomatis NIJ
+    window.onload = function() {
+        const randomNum = Math.floor(1000 + Math.random() * 9000); // Simulasi urutan
+        document.getElementById('nij_display').value = `NIJ-PPP-${randomNum}-2026`;
+    };
+
+    const subData = {
+        "Koordinator": ["Koordinator Lansia", "Koordinator Bapak", "Koordinator Ibu", "Koordinator profesi", "Koordinator Mahasiswa", "Koordinator Pelajar", "koordinator Remaja", "Koordinator Sekolah Minggu", "Koordinator Bidang Pujian penyembahan", "koordinator Musik", "Koordinator Vocal dan Singer", "Koordinator tamborin", "Koordinator Flag", "koordinator Multimedia", "Koordinator Sound and Electrikal", "koordinator User", "Koordinator Event Organizer", "koordinator Perpakiran dan keamanan", "General Affairs"],
+        "Musik": ["drumer Player", "Lead Gitar player", "guitar rhythm palyer", "Bass Guitar player", "Lead Piano player", "Keyboard player", "Saxophone player", "Ketipung player", "violine player", "flute player", "cielo player", "brasso player", "french horn player", "trombon player"],
+        "Vocal": ["Vocal Coach", "Worship leader", "singers", "Choirs Team"],
+        "Multimedia": ["Director Media", "Campers", "Floor Direct", "Floor Crew", "Easy Worship Operator", "Pro Presenter Operator", "Video Stream Operator", "Video Switching Operator"],
+        "Sound": ["Director Sound", "Audio Mixer Operator", "Periperhal Electrikal", "periperhal Perlatan Musik", "Sound engineering", "Elektrical engineering"],
+        "Tamborin": ["Tamborin coach", "Flag Coach", "tamborin player", "Flag Player"],
+        "User": ["front desk user", "user direct", "general affairs"],
+        "Doa": ["Penjaga menara Doa", "Pendoa syafaat"],
+        "Misi": ["Bidang R & D (Research and Development)", "Humas", "Fundrising", "Pemetaan dan Roadmap"],
+        "Keamanan": ["Park Chief", "Park Crew", "security Crew"]
+    };
+
+    function handlePelayanan(val) {
+        const box = document.getElementById('sub-box');
+        const sel = document.getElementById('sub-select');
+        const label = document.getElementById('sub-label');
+        if(subData[val]) {
+            box.classList.remove('hidden');
+            label.innerText = "Pilih Bidang Spesifik " + val + ":";
+            sel.innerHTML = subData[val].map(i => `<option>${i}</option>`).join("");
+        } else {
+            box.classList.add('hidden');
+        }
+    }
+
     function handleFile(input, previewId, boxId) {
         const box = document.getElementById(boxId);
         if (input.files && input.files[0]) {
@@ -205,69 +232,21 @@
                 reader.readAsDataURL(input.files[0]);
             }
             box.classList.add('uploaded');
-            box.innerHTML = `<i class="fas fa-check-circle"></i> ${input.files[0].name.substring(0,15)}...`;
+            box.innerHTML = `<i class="fas fa-check-circle"></i> File Terupload`;
             checkForm();
         }
     }
 
     function toggleMarriage(isMarried) {
         document.getElementById('form-pasangan').classList.toggle('hidden', !isMarried);
-        const nikahInp = document.getElementById('inp-nikah');
-        const nikahBox = document.getElementById('box-nikah-file');
-        if(isMarried) {
-            nikahInp.required = true;
-            nikahBox.innerHTML = "Surat Nikah *WAJIB";
-        } else {
-            nikahInp.required = false;
-            nikahBox.innerHTML = "Surat Nikah (Opsional)";
-        }
         checkForm();
-    }
-
-    function updatePasanganLabel() {
-        const p = document.getElementById('pilih_p').value;
-        const n = document.getElementById('nama_p').value;
-        document.getElementById('hasil-p').innerHTML = n ? `<strong>${p} : ${n}</strong>` : "";
     }
 
     function genAnak(num) {
         const container = document.getElementById('list-anak');
-        container.innerHTML = "";
-        if(num > 0) {
-            container.innerHTML = `<label>Nama-nama Anak:</label>`;
-            for(let i=1; i<=num; i++) {
-                container.innerHTML += `<div class="form-group"><input type="text" placeholder="Nama Anak ke-${i}"></div>`;
-            }
-        }
-    }
-
-    // DATA DROPDOWN SESUAI INSTRUKSI BARU
-    const subData = {
-        "Koordinator": ["Koordinator Lansia", "Koordinator Bapak", "Koordinator Ibu", "Koordinator profesi", "Koordinator Mahasiswa", "Koordinator Pelajar", "koordinator Remaja", "Koordinator Sekolah Minggu"],
-        "KoordinatorBidang": ["Koordinator Bidang Pujian penyembahan", "koordinator Musik", "Koordinator Vocal dan Singer", "Koordinator tamborin", "Koordinator Flag", "koordinator Multimedia", "Koordinator Sound and Electrikal", "koordinator User", "Koordinator Event Organizer", "koordinator Perpakiran dan keamanan", "General Affairs"],
-        "Musik": ["drumer Player", "Lead Gitar player", "guitar rhythm palyer", "Bass Guitar player", "Lead Piano player", "Keyboard player", "Saxophone player", "Ketipung player", "violine player", "flute player", "cielo player", "brasso player", "french horn player", "trombon player"],
-        "Vocal": ["Vocal Coach", "Worship leader", "singers", "Choirs Team"],
-        "Multimedia": ["Director Media", "Campers", "Floor Direct", "Floor Crew", "Easy Worship Operator", "Pro Presenter Operator", "Video Stream Operator", "Video Switching Operator"],
-        "Sound": ["Director Sound", "Audio Mixer Operator", "Periperhal Electrikal", "periperhal Perlatan Musik", "Sound engineering", "Elektrical engineering"],
-        "Tamborin": ["Tamborin coach", "Flag Coach", "tamborin player", "Flag Player"],
-        "User": ["front desk user", "user direct", "general affairs"],
-        "Pendoa": ["Penjaga menara Doa", "Pendoa syafaat"],
-        "Misi": ["Bidang R & D (Research and Development)", "Humas", "Fundrising", "Pemetaan dan Roadmap"],
-        "Parkir": ["Park Chief", "Park Crew", "security Crew"],
-        "PKS": ["PKS Komsel Lansia", "PKS Komsel Bapak", "PKS Komsel IBU", "PKS Komsel Profesi", "PKS Komsel mahasiswa", "PKS Komsel Pelajar"]
-    };
-
-    function handlePelayanan(val) {
-        const box = document.getElementById('sub-box');
-        const sel = document.getElementById('sub-select');
-        const label = document.getElementById('sub-label');
-        
-        if(subData[val]) {
-            box.classList.remove('hidden');
-            label.innerText = "Pilih Bidang " + val + " Spesifik:";
-            sel.innerHTML = subData[val].map(i => `<option>${i}</option>`).join("");
-        } else {
-            box.classList.add('hidden');
+        container.innerHTML = num > 0 ? `<label>Nama Anak-anak:</label>` : "";
+        for(let i=1; i<=num; i++) {
+            container.innerHTML += `<input type="text" placeholder="Nama Anak ke-${i}" style="margin-bottom:10px;">`;
         }
     }
 
@@ -279,7 +258,7 @@
     document.getElementById('mainForm').addEventListener('input', checkForm);
     document.getElementById('mainForm').onsubmit = (e) => {
         e.preventDefault();
-        alert("Puji Tuhan! Data Jemaat telah berhasil diperbarui dan disimpan.");
+        alert("Data Berhasil Disimpan dengan " + document.getElementById('nij_display').value);
     };
 </script>
 </body>
