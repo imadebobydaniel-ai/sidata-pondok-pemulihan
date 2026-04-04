@@ -185,20 +185,28 @@
                 <label class="upload-box" id="box-baptis-file">Surat Baptis <input type="file" class="hidden" required onchange="handleFile(this, null, 'box-baptis-file')"></label>
             </div>
 
-            <button type="submit" id="btnSubmit" class="btn-action">SIMPAN DATA JEMAAT</button>
+            <button type="submit" id="btnSubmit" class="btn-action" disabled>SIMPAN DATA JEMAAT</button>
         </form>
     </div>
 </div>
 
 <script>
-    // Penomoran Otomatis NIJ dengan format urut 2 digit
+    // LOGIKA PENOMORAN OTOMATIS (PROGRESIF)
+    let jumlahPendaftarDiDatabase = 0; // Awal mula 0
+
     window.onload = function() {
-        // Simulasi nomor urut (nanti ini bisa diganti dengan logis Fetch dari Database)
-        const urutan = Math.floor(Math.random() * 99) + 1; 
-        const formattedNum = String(urutan).padStart(2, '0'); 
-        document.getElementById('nij_display').value = `NIJ-PPP-${formattedNum}-2026`;
+        generateNIJ();
     };
 
+    function generateNIJ() {
+        // Ambil jumlah sekarang + 1
+        let urutanBaru = jumlahPendaftarDiDatabase + 1; 
+        // Format ke 2 digit (01, 02, dst)
+        const formattedNum = String(urutanBaru).padStart(2, '0'); 
+        document.getElementById('nij_display').value = `NIJ-PPP-${formattedNum}-2026`;
+    }
+
+    // LOGIKA DATA BIDANG
     const subData = {
         "Koordinator": ["Koordinator Lansia", "Koordinator Bapak", "Koordinator Ibu", "Koordinator profesi", "Koordinator Mahasiswa", "Koordinator Pelajar", "koordinator Remaja", "Koordinator Sekolah Minggu", "Koordinator Bidang Pujian penyembahan", "koordinator Musik", "Koordinator Vocal dan Singer", "Koordinator tamborin", "Koordinator Flag", "koordinator Multimedia", "Koordinator Sound and Electrikal", "koordinator User", "Koordinator Event Organizer", "koordinator Perpakiran dan keamanan", "General Affairs"],
         "Musik": ["drumer Player", "Lead Gitar player", "guitar rhythm palyer", "Bass Guitar player", "Lead Piano player", "Keyboard player", "Saxophone player", "Ketipung player", "violine player", "flute player", "cielo player", "brasso player", "french horn player", "trombon player"],
@@ -257,10 +265,23 @@
         document.getElementById('btnSubmit').disabled = !form.checkValidity();
     }
 
+    // EVENT SAAT FORM DISUBMIT
     document.getElementById('mainForm').addEventListener('input', checkForm);
     document.getElementById('mainForm').onsubmit = (e) => {
         e.preventDefault();
-        alert("Data Berhasil Disimpan dengan " + document.getElementById('nij_display').value);
+        
+        const currentNIJ = document.getElementById('nij_display').value;
+        alert("Data Berhasil Disimpan dengan Nomor: " + currentNIJ);
+        
+        // Tambahkan jumlah pendaftar (Simulasi Database)
+        jumlahPendaftarDiDatabase++; 
+        
+        // Generate nomor baru untuk pendaftar selanjutnya
+        generateNIJ(); 
+        
+        // Reset form (opsional, jika ingin input baru lagi)
+        // e.target.reset();
+        // checkForm();
     };
 </script>
 </body>
