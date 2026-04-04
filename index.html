@@ -6,14 +6,14 @@
     <title>Sistem Informasi - Pondok Pemulihan Papua</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <style> 
-        :root { --primary: #ffc107; --bg: #0f172a; --card: #1e293b; }
+        :root { --primary: #ffc107; --bg: #0f172a; --card: #1e293b; --error: #ef4444; --success: #22c55e; }
         * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Segoe UI', Tahoma, sans-serif; }
         
         body {
             height: 100vh; width: 100vw;
             display: flex; justify-content: center; align-items: center;
             overflow: hidden; position: relative; margin: 0;
-            background: linear-gradient(rgba(15, 23, 42, 0.7), rgba(15, 23, 42, 0.7)), 
+            background: linear-gradient(rgba(15, 23, 42, 0.8), rgba(15, 23, 42, 0.8)), 
                         url('poster_papua.jpg') no-repeat center center fixed;
             background-size: cover; color: white;
         }
@@ -30,238 +30,149 @@
             background: rgba(255, 255, 255, 0.05); padding: 40px; 
             border-radius: 15px; border: 1px solid var(--primary); 
             width: 100%; max-width: 400px; text-align: center; 
-            backdrop-filter: blur(10px); 
+            backdrop-filter: blur(10px); position: relative;
         }
 
-        .main-container {
-            position: fixed; top: 80px; width: 100%; height: calc(100% - 80px);
-            padding: 20px; overflow-y: auto; display: flex; flex-direction: column;
-            align-items: center; z-index: 10;
+        /* Password Wrapper & Eye Logic */
+        .password-wrapper { position: relative; width: 100%; margin-bottom: 20px; }
+        .eye-icon {
+            position: absolute; right: 15px; top: 50%; transform: translateY(-50%);
+            cursor: pointer; font-size: 1.2rem; color: var(--primary); transition: 0.3s;
         }
 
-        #top-bar-info { 
-            position: fixed; top: 0; left: 0; width: 100%; height: 80px; 
-            background: rgba(0, 0, 0, 0.8); backdrop-filter: blur(15px); 
-            display: flex; align-items: center; justify-content: space-between; 
-            padding: 0 30px; border-bottom: 2px solid var(--primary); z-index: 100; 
+        /* Animasi Mata Menangis */
+        .tear {
+            position: absolute; color: #60a5fa; font-size: 10px;
+            top: 50%; right: 20px; opacity: 0; pointer-events: none;
+        }
+        @keyframes crying {
+            0% { transform: translateY(0); opacity: 1; }
+            100% { transform: translateY(20px); opacity: 0; }
+        }
+        .animate-tear { animation: crying 0.8s infinite; }
+        .shake { animation: shake 0.5s; border-color: var(--error) !important; }
+        @keyframes shake {
+            0%, 100% { transform: translateX(0); }
+            25% { transform: translateX(-5px); }
+            75% { transform: translateX(5px); }
         }
 
+        /* Efek Flash Kedip */
+        .flash-blink { animation: flash-anim 0.5s alternate 2; }
+        @keyframes flash-anim {
+            from { filter: brightness(1); }
+            to { filter: brightness(3) drop-shadow(0 0 10px white); }
+        }
+
+        /* Rest of UI */
+        .main-container { position: fixed; top: 80px; width: 100%; height: calc(100% - 80px); padding: 20px; overflow-y: auto; display: flex; flex-direction: column; align-items: center; z-index: 10; }
+        #top-bar-info { position: fixed; top: 0; left: 0; width: 100%; height: 80px; background: rgba(0, 0, 0, 0.8); backdrop-filter: blur(15px); display: flex; align-items: center; justify-content: space-between; padding: 0 30px; border-bottom: 2px solid var(--primary); z-index: 100; }
         .hidden { display: none !important; }
-        
-        /* Form & Cards */
         .card-form { background: var(--card); padding: 30px; border-radius: 15px; width: 100%; max-width: 900px; border: 1px solid var(--primary); margin-bottom: 50px; }
-        .section-title { color: var(--primary); font-weight: bold; margin: 25px 0 10px; border-bottom: 1px solid #444; padding-bottom: 5px; text-align: left; text-transform: uppercase; }
-        .form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; }
-        .form-group { margin-bottom: 15px; display: flex; flex-direction: column; text-align: left; }
-        
-        input, select { padding: 10px; border-radius: 5px; border: 1px solid #475569; background: #0f172a; color: white; margin-top: 5px; }
-        input[type="file"] { border: 1px dashed var(--primary); cursor: pointer; }
-
-        .btn-masuk, .btn-submit { background: var(--primary); color: black; border: none; padding: 12px; border-radius: 8px; cursor: pointer; font-weight: bold; transition: 0.3s; }
-        .btn-masuk:hover, .btn-submit:hover { background: #e5ac00; }
+        input { width: 100%; padding: 12px; border-radius: 8px; border: 1px solid #475569; background: #0f172a; color: white; margin-top: 5px; }
+        .btn-masuk { background: var(--primary); color: black; border: none; padding: 12px; border-radius: 8px; cursor: pointer; font-weight: bold; width: 100%; }
         .btn-batal { background: #e11d48; color: white; border: none; padding: 8px 15px; border-radius: 8px; cursor: pointer; }
-        
-        /* Table Style */
-        table { width: 100%; border-collapse: collapse; background: var(--card); margin-top: 20px; }
-        th, td { padding: 12px; text-align: left; border-bottom: 1px solid #444; }
-        th { background: #334155; color: var(--primary); }
     </style>
 </head>
 <body>
 
     <div id="login-overlay">
-        <div class="login-card">
-            <img src="logo_pope.png" style="width: 80px; margin-bottom: 20px;" alt="Logo">
+        <div class="login-card" id="card-box">
+            <img src="logo_pope.png" style="width: 80px; margin-bottom: 20px;">
             <h2 style="color: var(--primary);">ADMIN PORTAL</h2>
-            <p style="font-size: 0.8rem; margin-bottom: 20px; color: #ccc;">Silahkan masuk untuk akses database</p>
+            <p style="font-size: 0.8rem; margin-bottom: 20px; color: #ccc;">Sistem Informasi Pondok Pemulihan</p>
+            
             <form id="loginForm">
-                <input type="text" id="username_input" placeholder="Username" required style="width:100%; margin-bottom:10px; padding:12px; border-radius:8px;">
-                <input type="password" id="password_input" placeholder="Password" required style="width:100%; margin-bottom:20px; padding:12px; border-radius:8px;">
-                <button type="submit" class="btn-masuk" style="width:100%">MASUK SISTEM</button>
+                <input type="text" id="username_input" placeholder="Username" required style="margin-bottom:10px;">
+                
+                <div class="password-wrapper">
+                    <input type="password" id="password_input" placeholder="Password" required>
+                    <i class="fas fa-eye eye-icon" id="eye-toggle"></i>
+                    <span class="tear" id="tear-drop">💧</span>
+                </div>
+
+                <button type="submit" class="btn-masuk">MASUK SISTEM</button>
             </form>
         </div>
     </div>
 
     <div id="top-bar-info" class="hidden">
-        <div>
-            <p id="display-date" style="font-size: 0.8rem;">Memuat...</p>
-            <p id="display-clock" style="font-weight: bold; color: var(--primary);">00:00:00</p>
-        </div>
-        <h3 style="cursor:pointer;" onclick="tampilkanView('welcome-view')">PONDOK PEMULIHAN PAPUA</h3>
-        <button onclick="prosesLogout()" class="btn-batal"><i class="fas fa-sign-out-alt"></i> LOGOUT</button>
+        <div><p id="display-date">Memuat...</p><p id="display-clock" style="color: var(--primary); font-weight:bold;">00:00:00</p></div>
+        <h3>PONDOK PEMULIHAN PAPUA</h3>
+        <button onclick="prosesLogout()" class="btn-batal">LOGOUT</button>
     </div>
 
     <div class="main-container hidden" id="content-app">
-        
-        <section id="welcome-view">
-            <img src="logo_pope.png" style="width: 150px; margin-bottom: 20px;" alt="Logo Large">
-            <h1 style="font-size: 2.5rem;">SELAMAT DATANG</h1>
-            <h3 style="color: var(--primary); letter-spacing: 2px;">SISTEM INFORMASI DATA JEMAAT</h3>
-            <div style="margin-top: 30px; display: flex; gap: 15px; justify-content: center;">
-                <button onclick="tampilkanView('input-view')" style="padding: 15px 30px; background: var(--primary); border: none; border-radius: 8px; cursor: pointer; font-weight: bold;">+ INPUT DATA JEMAAT</button>
-                <button onclick="tampilkanView('database-view')" style="padding: 15px 30px; background: white; color: black; border: none; border-radius: 8px; cursor: pointer; font-weight: bold;">LIHAT DATABASE</button>
+        <section id="welcome-view" style="text-align: center;">
+            <img src="logo_pope.png" style="width: 120px; margin-bottom: 20px;">
+            <h1>SISTEM BERHASIL DIAKSES</h1>
+            <p style="color: var(--primary); margin-top: 10px;">Selamat Bekerja, Admin.</p>
+            <div style="margin-top:30px;">
+                <button onclick="alert('Fitur segera hadir!')" class="btn-masuk" style="width: auto; padding: 10px 20px;">BUKA DATABASE</button>
             </div>
         </section>
-
-        <div id="input-view" class="hidden">
-            <div class="card-form">
-                <h2 style="text-align:center; color:var(--primary); margin-bottom:20px;">FORM PENDAFTARAN JEMAAT</h2>
-                <form id="formJemaat">
-                    <div class="section-title">A. IDENTITAS PRIBADI</div>
-                    <div class="form-group"><label>Nama Lengkap *</label><input type="text" id="nama_lengkap" required></div>
-                    <div class="form-grid">
-                        <div class="form-group"><label>Alamat Domisili</label><input type="text" id="alamat_domisili"></div>
-                        <div class="form-group"><label>No. WhatsApp *</label><input type="tel" id="no_wa" required></div>
-                    </div>
-
-                    <div class="section-title">B. UNGGAH DOKUMEN</div>
-                    <div class="form-group">
-                        <label>Foto Profil (JPG/PNG)</label>
-                        <input type="file" id="up_foto" accept="image/*">
-                    </div>
-                    <div class="form-grid">
-                        <div class="form-group"><label>KTP (PDF)</label><input type="file" id="up_ktp" accept=".pdf"></div>
-                        <div class="form-group"><label>KK (PDF)</label><input type="file" id="up_kk" accept=".pdf"></div>
-                    </div>
-
-                    <div style="display: flex; gap: 10px; margin-top: 30px;">
-                        <button type="submit" id="btn-simpan" class="btn-submit" style="flex:2">SIMPAN DATA</button>
-                        <button type="button" onclick="tampilkanView('welcome-view')" style="flex:1; background:#444; color:white; border:none; border-radius:8px; cursor:pointer;">BATAL</button>
-                    </div>
-                </form>
-            </div>
-        </div>
-
-        <div id="database-view" class="hidden" style="width: 100%; max-width: 1100px;">
-            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:20px;">
-                <h2 style="color: var(--primary);">DATABASE JEMAAT</h2>
-                <button onclick="tampilkanView('welcome-view')" class="btn-submit">KEMBALI</button>
-            </div>
-            <div id="tabel-container">
-                <p style="text-align:center; color:#ccc;">Memuat data jemaat...</p>
-            </div>
-        </div>
     </div>
 
     <script type="module">
-        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
-        import { getFirestore, collection, addDoc, getDocs, query, orderBy } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+        const eye = document.getElementById('eye-toggle');
+        const passInput = document.getElementById('password_input');
+        const cardBox = document.getElementById('card-box');
+        const tear = document.getElementById('tear-drop');
 
-        // Konfigurasi Firebase Mas (Sesuai gambar yang dikirim)
-        const firebaseConfig = {
-            apiKey: "AIzaSyDIZA6rWBJHAjfm_cSoiaZFjc48fSwCQYw",
-            authDomain: "sidata-pondok-pemulihan.firebaseapp.com",
-            projectId: "sidata-pondok-pemulihan",
-            storageBucket: "sidata-pondok-pemulihan.appspot.com",
-            messagingSenderId: "244791653787",
-            appId: "1:244791653787:web:e66ee6ac264dca643d1d3e"
+        // Toggle Sembunyi/Lihat Password
+        eye.onclick = () => {
+            const type = passInput.type === 'password' ? 'text' : 'password';
+            passInput.type = type;
+            eye.classList.toggle('fa-eye-slash');
         };
-
-        const app = initializeApp(firebaseConfig);
-        const db = getFirestore(app);
-
-        // --- NAVIGATION ---
-        window.tampilkanView = (viewId) => {
-            document.getElementById('welcome-view').classList.add('hidden');
-            document.getElementById('input-view').classList.add('hidden');
-            document.getElementById('database-view').classList.add('hidden');
-            document.getElementById(viewId).classList.remove('hidden');
-            
-            if(viewId === 'database-view') muatDataJemaat();
-        };
-
-        // --- LOGIN LOGIC ---
-        const overlay = document.getElementById('login-overlay');
-        const topBar = document.getElementById('top-bar-info');
-        const appContent = document.getElementById('content-app');
-
-        window.addEventListener('load', () => {
-            if (localStorage.getItem('isLoggedIn') === 'true') {
-                showDashboard();
-            }
-        });
 
         document.getElementById('loginForm').onsubmit = (e) => {
             e.preventDefault();
             const user = document.getElementById('username_input').value;
-            const pass = document.getElementById('password_input').value;
+            const pass = passInput.value;
 
-            // Update: Sesuaikan dengan username di gambar Mas
+            // Logika Login
             if (user === "admin_papua" && pass === "papua123") {
-                localStorage.setItem('isLoggedIn', 'true');
-                showDashboard();
+                // EFEK BERHASIL: Kedip & Flash
+                eye.className = "fas fa-smile eye-icon flash-blink";
+                setTimeout(() => {
+                    localStorage.setItem('isLoggedIn', 'true');
+                    showDashboard();
+                }, 1000);
             } else {
-                alert("Username atau Password Salah!");
+                // EFEK GAGAL: Menangis & Getar
+                cardBox.classList.add('shake');
+                eye.className = "fas fa-sad-tear eye-icon";
+                tear.classList.add('animate-tear');
+                
+                setTimeout(() => {
+                    cardBox.classList.remove('shake');
+                    tear.classList.remove('animate-tear');
+                    eye.className = "fas fa-eye eye-icon";
+                    alert("Akses Ditolak! Cek Username/Password.");
+                }, 1500);
             }
         };
+
+        function showDashboard() {
+            document.getElementById('login-overlay').classList.add('hidden');
+            document.getElementById('top-bar-info').classList.remove('hidden');
+            document.getElementById('content-app').classList.remove('hidden');
+        }
 
         window.prosesLogout = () => {
             localStorage.removeItem('isLoggedIn');
             location.reload();
         };
 
-        function showDashboard() {
-            overlay.classList.add('hidden');
-            topBar.classList.remove('hidden');
-            appContent.classList.remove('hidden');
-        }
+        // Auto-login check
+        if (localStorage.getItem('isLoggedIn') === 'true') showDashboard();
 
-        // --- SAVE DATA TO FIREBASE ---
-        document.getElementById('formJemaat').onsubmit = async (e) => {
-            e.preventDefault();
-            const btn = document.getElementById('btn-simpan');
-            btn.innerText = "MENYIMPAN...";
-            btn.disabled = true;
-
-            try {
-                await addDoc(collection(db, "daftar_jemaat"), {
-                    nama: document.getElementById('nama_lengkap').value,
-                    alamat: document.getElementById('alamat_domisili').value,
-                    wa: document.getElementById('no_wa').value,
-                    tanggal_input: new Date().toISOString()
-                });
-                alert("Data Jemaat Berhasil Disimpan!");
-                document.getElementById('formJemaat').reset();
-                tampilkanView('welcome-view');
-            } catch (err) {
-                console.error(err);
-                alert("Gagal simpan: " + err.message);
-            } finally {
-                btn.innerText = "SIMPAN DATA";
-                btn.disabled = false;
-            }
-        };
-
-        // --- LOAD DATA FROM FIREBASE ---
-        async function muatDataJemaat() {
-            const container = document.getElementById('tabel-container');
-            try {
-                const q = query(collection(db, "daftar_jemaat"), orderBy("tanggal_input", "desc"));
-                const querySnapshot = await getDocs(q);
-                
-                let html = `<table><thead><tr><th>Nama</th><th>Alamat</th><th>WhatsApp</th></tr></thead><tbody>`;
-                
-                querySnapshot.forEach((doc) => {
-                    const data = doc.data();
-                    html += `<tr>
-                        <td>${data.nama}</td>
-                        <td>${data.alamat || '-'}</td>
-                        <td>${data.wa}</td>
-                    </tr>`;
-                });
-
-                html += `</tbody></table>`;
-                container.innerHTML = querySnapshot.empty ? "<p>Belum ada data jemaat.</p>" : html;
-            } catch (err) {
-                container.innerHTML = "<p style='color:red;'>Gagal memuat data: " + err.message + "</p>";
-            }
-        }
-
-        // --- CLOCK ---
+        // Jam Realtime
         setInterval(() => {
-            const now = new Date();
-            document.getElementById('display-clock').innerText = now.toLocaleTimeString('id-ID');
-            document.getElementById('display-date').innerText = now.toLocaleDateString('id-ID', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' });
+            const n = new Date();
+            document.getElementById('display-clock').innerText = n.toLocaleTimeString('id-ID');
+            document.getElementById('display-date').innerText = n.toLocaleDateString('id-ID', {weekday:'long', day:'numeric', month:'long'});
         }, 1000);
     </script>
 </body>
