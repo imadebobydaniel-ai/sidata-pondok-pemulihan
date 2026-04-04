@@ -191,25 +191,32 @@
 </div>
 
 <script>
-    // LOGIKA PENOMORAN OTOMATIS (PROGRESIF)
-    let jumlahPendaftarDiDatabase = 0; // Awal mula 0
+    let jumlahPendaftarDiDatabase = 0; 
 
     window.onload = function() {
         generateNIJ();
     };
 
     function generateNIJ() {
-        // Ambil jumlah sekarang + 1
         let urutanBaru = jumlahPendaftarDiDatabase + 1; 
-        // Format ke 2 digit (01, 02, dst)
         const formattedNum = String(urutanBaru).padStart(2, '0'); 
         document.getElementById('nij_display').value = `NIJ-PPP-${formattedNum}-2026`;
     }
 
-    // LOGIKA DATA BIDANG
+    // DATA DROPDOWN YANG TELAH DIPERBAHARUI SESUAI PERMINTAAN ANDA
     const subData = {
-        "Koordinator": ["Koordinator Lansia", "Koordinator Bapak", "Koordinator Ibu", "Koordinator profesi", "Koordinator Mahasiswa", "Koordinator Pelajar", "koordinator Remaja", "Koordinator Sekolah Minggu", "Koordinator Bidang Pujian penyembahan", "koordinator Musik", "Koordinator Vocal dan Singer", "Koordinator tamborin", "Koordinator Flag", "koordinator Multimedia", "Koordinator Sound and Electrikal", "koordinator User", "Koordinator Event Organizer", "koordinator Perpakiran dan keamanan", "General Affairs"],
-        "Musik": ["drumer Player", "Lead Gitar player", "guitar rhythm palyer", "Bass Guitar player", "Lead Piano player", "Keyboard player", "Saxophone player", "Ketipung player", "violine player", "flute player", "cielo player", "brasso player", "french horn player", "trombon player"],
+        "Koordinator": [
+            "Koordinator Lansia", "Koordinator Bapak", "Koordinator Ibu", "Koordinator profesi", 
+            "Koordinator Mahasiswa", "Koordinator Pelajar", "koordinator Remaja", "Koordinator Sekolah Minggu",
+            "Koordinator Bidang Pujian penyembahan", "koordinator Musik", "Koordinator Vocal dan Singer", 
+            "Koordinator tamborin", "Koordinator Flag", "koordinator Multimedia", "Koordinator Sound and Electrikal", 
+            "koordinator User", "Koordinator Event Organizer", "koordinator Perpakiran dan keamanan", "General Affairs"
+        ],
+        "Musik": [
+            "drumer Player", "Lead Gitar player", "guitar rhythm palyer", "Bass Guitar player", 
+            "Lead Piano player", "Keyboard player", "Saxophone player", "Ketipung player", 
+            "violine player", "flute player", "cielo player", "brasso player", "french horn player", "trombon player"
+        ],
         "Vocal": ["Vocal Coach", "Worship leader", "singers", "Choirs Team"],
         "Multimedia": ["Director Media", "Campers", "Floor Direct", "Floor Crew", "Easy Worship Operator", "Pro Presenter Operator", "Video Stream Operator", "Video Switching Operator"],
         "Sound": ["Director Sound", "Audio Mixer Operator", "Periperhal Electrikal", "periperhal Perlatan Musik", "Sound engineering", "Elektrical engineering"],
@@ -224,10 +231,11 @@
         const box = document.getElementById('sub-box');
         const sel = document.getElementById('sub-select');
         const label = document.getElementById('sub-label');
+        
         if(subData[val]) {
             box.classList.remove('hidden');
             label.innerText = "Pilih Bidang Spesifik " + val + ":";
-            sel.innerHTML = subData[val].map(i => `<option>${i}</option>`).join("");
+            sel.innerHTML = subData[val].map(i => `<option value="${i}">${i}</option>`).join("");
         } else {
             box.classList.add('hidden');
         }
@@ -265,23 +273,13 @@
         document.getElementById('btnSubmit').disabled = !form.checkValidity();
     }
 
-    // EVENT SAAT FORM DISUBMIT
     document.getElementById('mainForm').addEventListener('input', checkForm);
     document.getElementById('mainForm').onsubmit = (e) => {
         e.preventDefault();
-        
         const currentNIJ = document.getElementById('nij_display').value;
         alert("Data Berhasil Disimpan dengan Nomor: " + currentNIJ);
-        
-        // Tambahkan jumlah pendaftar (Simulasi Database)
         jumlahPendaftarDiDatabase++; 
-        
-        // Generate nomor baru untuk pendaftar selanjutnya
         generateNIJ(); 
-        
-        // Reset form (opsional, jika ingin input baru lagi)
-        // e.target.reset();
-        // checkForm();
     };
 </script>
 </body>
