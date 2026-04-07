@@ -40,14 +40,12 @@
         .admin-content { opacity: 0; display: none; transition: 0.5s; }
         .admin-content.active { opacity: 1; display: block; }
         
-        /* Mobile Header / Navbar */
         .mobile-nav {
             display: none; position: fixed; top: 0; width: 100%; height: 60px;
             background: #000; border-bottom: 1px solid #333; z-index: 999;
             padding: 0 20px; align-items: center; justify-content: space-between;
         }
 
-        /* Sidebar Management */
         .sidebar { 
             width: var(--sidebar-w); background: #000; border-right: 1px solid #222; 
             padding: 20px; display: flex; flex-direction: column; gap: 8px;
@@ -61,7 +59,6 @@
         .menu-item:hover { color: var(--gold); background: rgba(212, 175, 55, 0.05); }
         .menu-item.active { background: var(--gold); color: black; box-shadow: 0 4px 15px rgba(212, 175, 55, 0.3); }
 
-        /* Content Area */
         .main-panel { margin-left: var(--sidebar-w); padding: 40px; transition: 0.4s; }
 
         /* --- PAGE SECTIONS --- */
@@ -70,8 +67,6 @@
         @keyframes slideUp { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
 
         /* --- UI ELEMENTS --- */
-        .dashboard-header { margin-bottom: 30px; }
-        .card-container { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 15px; }
         .stat-card { 
             background: var(--dark-card); padding: 20px; border-radius: 16px; 
             border: 1px solid #222; position: relative; overflow: hidden;
@@ -92,44 +87,41 @@
             width: 100%; padding: 12px; background: #000; border: 1px solid #333; 
             color: white; border-radius: 8px; outline: none; transition: 0.3s;
         }
-        .input-group input:focus { border-color: var(--gold); }
 
-        /* --- TABLE REPOSITORY (Card style on mobile) --- */
         .custom-table { width: 100%; border-collapse: collapse; margin-top: 10px; }
         .custom-table th { text-align: left; padding: 15px; color: var(--gold); border-bottom: 2px solid #222; font-size: 0.9rem; }
         .custom-table td { padding: 15px; border-bottom: 1px solid #222; color: #ccc; }
 
         .btn-add { background: #22c55e; color: white; padding: 12px 24px; border: none; border-radius: 10px; cursor: pointer; font-weight: 600; }
         .btn-delete { background: rgba(239, 68, 68, 0.1); color: #ef4444; border: 1px solid #ef4444; padding: 8px; border-radius: 8px; cursor: pointer; }
+        .btn-edit { background: rgba(212, 175, 55, 0.1); color: var(--gold); border: 1px solid var(--gold); padding: 8px; border-radius: 8px; cursor: pointer; margin-right: 5px; }
 
-        /* --- RESPONSIVE MOBILE --- */
+        /* --- MODAL EDIT --- */
+        .modal {
+            display: none; position: fixed; z-index: 10001; 
+            left: 0; top: 0; width: 100%; height: 100%; 
+            background-color: rgba(0,0,0,0.85); backdrop-filter: blur(5px);
+        }
+        .modal-content {
+            background-color: var(--dark-card); margin: 10% auto; padding: 25px; 
+            border: 1px solid var(--gold); border-radius: 20px; width: 90%; max-width: 400px;
+            animation: slideDown 0.3s ease;
+        }
+        @keyframes slideDown { from {transform: translateY(-50px); opacity: 0;} to {transform: translateY(0); opacity: 1;} }
+
         @media (max-width: 992px) {
             .mobile-nav { display: flex; }
             .sidebar { transform: translateX(-100%); width: 280px; }
             .sidebar.open { transform: translateX(0); box-shadow: 20px 0 50px rgba(0,0,0,0.8); }
             .main-panel { margin-left: 0; padding: 80px 20px 40px 20px; }
-            
             .form-row { flex-direction: column; align-items: stretch; }
-            
-            /* Responsive Table to Cards */
             .custom-table thead { display: none; }
-            .custom-table tr { 
-                display: block; background: #252525; margin-bottom: 15px; 
-                border-radius: 12px; padding: 10px; border: 1px solid #333;
-            }
-            .custom-table td { 
-                display: flex; justify-content: space-between; align-items: center; 
-                padding: 10px 15px; border-bottom: 1px solid #333; text-align: right;
-            }
-            .custom-table td::before { content: attr(data-label); font-weight: bold; color: var(--gold); text-align: left; }
-            .custom-table td:last-child { border-bottom: none; }
+            .custom-table tr { display: block; background: #252525; margin-bottom: 15px; border-radius: 12px; padding: 10px; border: 1px solid #333; }
+            .custom-table td { display: flex; justify-content: space-between; align-items: center; padding: 10px 15px; border-bottom: 1px solid #333; }
+            .custom-table td::before { content: attr(data-label); font-weight: bold; color: var(--gold); }
         }
 
-        /* Sidebar Overlay */
-        .overlay { 
-            display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; 
-            background: rgba(0,0,0,0.7); z-index: 999; backdrop-filter: blur(4px);
-        }
+        .overlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.7); z-index: 999; }
         .overlay.active { display: block; }
     </style>
 </head>
@@ -138,11 +130,29 @@
 <div id="login-overlay">
     <div class="login-box">
         <h2 style="color: var(--gold); margin: 0 0 10px 0;">JAYA ADMIN</h2>
-        <p style="color: #666; font-size: 0.8rem; margin-bottom: 25px;">Enter credentials to manage showroom</p>
         <input type="text" id="username" placeholder="Username">
         <input type="password" id="password" placeholder="Password">
         <button class="btn-login" onclick="checkLogin()">MASUK KE PANEL</button>
         <p id="error-msg" style="color: #ef4444; font-size: 0.8rem; margin-top: 15px; display: none;">Kredensial Salah!</p>
+    </div>
+</div>
+
+<div id="modalEdit" class="modal">
+    <div class="modal-content">
+        <h3 style="color: var(--gold); margin-top: 0;">Edit Data Unit</h3>
+        <input type="hidden" id="edit-index">
+        <div class="input-group" style="margin-bottom: 15px;">
+            <label>Nama Mobil</label>
+            <input type="text" id="edit-nama">
+        </div>
+        <div class="input-group" style="margin-bottom: 20px;">
+            <label>Harga (Contoh: 2.45M)</label>
+            <input type="text" id="edit-harga">
+        </div>
+        <div style="display: flex; gap: 10px;">
+            <button class="btn-add" onclick="saveEdit()" style="flex: 1;">Simpan</button>
+            <button onclick="closeModal()" style="flex: 1; background: #333; color: white; border: none; border-radius: 10px; cursor: pointer;">Batal</button>
+        </div>
     </div>
 </div>
 
@@ -157,65 +167,47 @@
 
     <div class="admin-wrapper">
         <nav class="sidebar" id="sidebar">
-            <div style="padding: 20px 10px 40px 10px; text-align: center;" class="desktop-only">
+            <div style="padding: 20px 10px 40px 10px; text-align: center;">
                 <h2 style="color: var(--gold); margin: 0; font-size: 1.4rem;">JAYA MOBIL</h2>
                 <span style="font-size: 0.6rem; color: #444; letter-spacing: 2px;">ADMINISTRATOR</span>
             </div>
-            
-            <div class="menu-item active" onclick="switchPage('main-stats', this)">
-                <i class="fas fa-th-large"></i> Dashboard
-            </div>
-            <div class="menu-item" onclick="switchPage('stok-mobil', this)">
-                <i class="fas fa-car"></i> Manajemen Stok
-            </div>
-            <div class="menu-item" onclick="switchPage('ai-setting', this)">
-                <i class="fas fa-robot"></i> Pengaturan AI
-            </div>
-            
+            <div class="menu-item active" onclick="switchPage('main-stats', this)"><i class="fas fa-th-large"></i> Dashboard</div>
+            <div class="menu-item" onclick="switchPage('stok-mobil', this)"><i class="fas fa-car"></i> Manajemen Stok</div>
+            <div class="menu-item" onclick="switchPage('ai-setting', this)"><i class="fas fa-robot"></i> Pengaturan AI</div>
             <div style="margin-top: auto; padding-top: 20px; border-top: 1px solid #222;">
-                <div class="menu-item" onclick="logout()" style="color: #ef4444;">
-                    <i class="fas fa-power-off"></i> Keluar
-                </div>
+                <div class="menu-item" onclick="logout()" style="color: #ef4444;"><i class="fas fa-power-off"></i> Keluar</div>
             </div>
         </nav>
 
         <main class="main-panel">
-            <div class="dashboard-header">
-                <h1 id="page-title" style="margin: 0; font-size: 1.5rem;">Dashboard</h1>
-                <p style="color: #666; margin: 5px 0 0 0;">Ringkasan sistem Jaya Mobil hari ini.</p>
-            </div>
-
+            <h1 id="page-title" style="margin: 0; font-size: 1.5rem;">Dashboard</h1>
+            
             <div id="main-stats" class="page-section active">
-                <div class="card-container">
-                    <div class="stat-card"><h3>Unit Ready</h3><p>45</p></div>
-                    <div class="stat-card"><h3>Terjual</h3><p>12</p></div>
+                <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 15px; margin-top: 25px;">
+                    <div class="stat-card"><h3>Unit Ready</h3><p id="count-ready">0</p></div>
                     <div class="stat-card"><h3>Visit</h3><p>1.2k</p></div>
                 </div>
             </div>
 
             <div id="stok-mobil" class="page-section">
-                <div style="margin-bottom: 20px; display: flex; justify-content: space-between; align-items: center;">
-                    <h2 style="margin:0; font-size: 1.2rem;">Daftar Unit</h2>
-                    <button class="btn-add" style="padding: 10px 15px;"><i class="fas fa-plus"></i></button>
-                </div>
                 <div class="admin-section">
+                    <h3 style="color: var(--gold); margin-top:0;">Tambah Unit Baru</h3>
+                    <div class="form-row">
+                        <div class="input-group">
+                            <label>Nama Mobil</label>
+                            <input type="text" id="new-car-name" placeholder="Contoh: Porsche 911">
+                        </div>
+                        <div class="input-group">
+                            <label>Harga (M/Jt)</label>
+                            <input type="text" id="new-car-price" placeholder="Contoh: 2.45M">
+                        </div>
+                        <button class="btn-add" onclick="addCarUnit()">Tambah</button>
+                    </div>
                     <table class="custom-table">
                         <thead>
-                            <tr>
-                                <th>Mobil</th>
-                                <th>Harga</th>
-                                <th>Aksi</th>
-                            </tr>
+                            <tr><th>Mobil</th><th>Harga</th><th>Aksi</th></tr>
                         </thead>
-                        <tbody>
-                            <tr>
-                                <td data-label="Mobil"><strong>Porsche 911</strong></td>
-                                <td data-label="Harga">Rp 2.45M</td>
-                                <td data-label="Aksi">
-                                    <button class="btn-delete"><i class="fas fa-trash"></i></button>
-                                </td>
-                            </tr>
-                        </tbody>
+                        <tbody id="car-table-body"></tbody>
                     </table>
                 </div>
             </div>
@@ -223,27 +215,13 @@
             <div id="ai-setting" class="page-section">
                 <div class="admin-section">
                     <h3 style="color: var(--gold); margin-top:0;">Asisten AI</h3>
-                    
                     <div class="form-row">
-                        <div class="input-group">
-                            <label>Keyword</label>
-                            <input type="text" id="bot-keyword" placeholder="Contoh: harga">
-                        </div>
-                        <div class="input-group">
-                            <label>Jawaban</label>
-                            <input type="text" id="bot-response" placeholder="Respon bot...">
-                        </div>
+                        <div class="input-group"><label>Keyword</label><input type="text" id="bot-keyword"></div>
+                        <div class="input-group"><label>Jawaban</label><input type="text" id="bot-response"></div>
                         <button class="btn-add" onclick="addBotKnowledge()">Simpan</button>
                     </div>
-
                     <table class="custom-table">
-                        <thead>
-                            <tr>
-                                <th>Keyword</th>
-                                <th>Jawaban</th>
-                                <th>Hapus</th>
-                            </tr>
-                        </thead>
+                        <thead><tr><th>Keyword</th><th>Jawaban</th><th>Hapus</th></tr></thead>
                         <tbody id="bot-table-body"></tbody>
                     </table>
                 </div>
@@ -262,71 +240,102 @@
     function switchPage(pageId, element) {
         document.querySelectorAll('.page-section').forEach(p => p.classList.remove('active'));
         document.querySelectorAll('.menu-item').forEach(m => m.classList.remove('active'));
-        
         document.getElementById(pageId).classList.add('active');
         element.classList.add('active');
-        
-        // Mobile behavior
         if(window.innerWidth <= 992) toggleSidebar();
-        
-        const titles = {
-            'main-stats': 'Dashboard',
-            'stok-mobil': 'Manajemen Stok',
-            'ai-setting': 'Pengaturan AI'
-        };
-        document.getElementById('page-title').innerText = titles[pageId];
+        document.getElementById('page-title').innerText = element.innerText.trim();
     }
 
-    // --- AUTH & DATA ---
+    // --- AUTH ---
     function checkLogin() {
-        const u = document.getElementById('username').value;
-        const p = document.getElementById('password').value;
-        if(u === "admin" && p === "jaya2026") {
+        if(document.getElementById('username').value === "admin" && document.getElementById('password').value === "jaya2026") {
             document.getElementById('login-overlay').style.display = 'none';
             document.getElementById('dashboard').classList.add('active');
             sessionStorage.setItem("logged", "true");
-            loadBotKnowledge();
-        } else {
-            document.getElementById('error-msg').style.display = 'block';
-        }
+            initData();
+        } else { document.getElementById('error-msg').style.display = 'block'; }
     }
 
-    function logout() {
-        sessionStorage.clear();
-        location.reload();
+    function logout() { sessionStorage.clear(); location.reload(); }
+
+    // --- DATA MANAGEMENT (CAR UNIT) ---
+    function addCarUnit() {
+        const name = document.getElementById('new-car-name').value;
+        const price = document.getElementById('new-car-price').value;
+        if(!name || !price) return;
+        let cars = JSON.parse(localStorage.getItem('car_stok')) || [];
+        cars.push({ name, price });
+        localStorage.setItem('car_stok', JSON.stringify(cars));
+        document.getElementById('new-car-name').value = "";
+        document.getElementById('new-car-price').value = "";
+        loadCars();
     }
 
+    function loadCars() {
+        const tbody = document.getElementById('car-table-body');
+        let cars = JSON.parse(localStorage.getItem('car_stok')) || [{name: 'Porsche 911', price: '2.45M'}];
+        tbody.innerHTML = "";
+        cars.forEach((car, i) => {
+            tbody.innerHTML += `<tr>
+                <td data-label="Mobil"><strong>${car.name}</strong></td>
+                <td data-label="Harga">Rp ${car.price}</td>
+                <td data-label="Aksi">
+                    <button class="btn-edit" onclick="openEditModal(${i}, '${car.name}', '${car.price}')"><i class="fas fa-edit"></i></button>
+                    <button class="btn-delete" onclick="deleteCar(${i})"><i class="fas fa-trash"></i></button>
+                </td>
+            </tr>`;
+        });
+        document.getElementById('count-ready').innerText = cars.length;
+    }
+
+    function deleteCar(i) {
+        let cars = JSON.parse(localStorage.getItem('car_stok'));
+        cars.splice(i, 1);
+        localStorage.setItem('car_stok', JSON.stringify(cars));
+        loadCars();
+    }
+
+    // --- EDIT MODAL LOGIC ---
+    function openEditModal(index, name, price) {
+        document.getElementById('edit-index').value = index;
+        document.getElementById('edit-nama').value = name;
+        document.getElementById('edit-harga').value = price;
+        document.getElementById('modalEdit').style.display = 'block';
+    }
+
+    function closeModal() { document.getElementById('modalEdit').style.display = 'none'; }
+
+    function saveEdit() {
+        const i = document.getElementById('edit-index').value;
+        let cars = JSON.parse(localStorage.getItem('car_stok'));
+        cars[i].name = document.getElementById('edit-nama').value;
+        cars[i].price = document.getElementById('edit-harga').value;
+        localStorage.setItem('car_stok', JSON.stringify(cars));
+        closeModal();
+        loadCars();
+    }
+
+    // --- AI KNOWLEDGE ---
     function addBotKnowledge() {
-        const kw = document.getElementById('bot-keyword').value.toLowerCase().trim();
-        const rs = document.getElementById('bot-response').value.trim();
+        const kw = document.getElementById('bot-keyword').value.toLowerCase();
+        const rs = document.getElementById('bot-response').value;
         if(!kw || !rs) return;
-
         let data = JSON.parse(localStorage.getItem('bot_data')) || [];
         data.push({ keyword: kw, response: rs });
         localStorage.setItem('bot_data', JSON.stringify(data));
-        
-        document.getElementById('bot-keyword').value = "";
-        document.getElementById('bot-response').value = "";
         loadBotKnowledge();
     }
 
     function loadBotKnowledge() {
         const tbody = document.getElementById('bot-table-body');
-        let data = JSON.parse(localStorage.getItem('bot_data')) || [
-            { keyword: "halo", response: "Halo, ada yang bisa kami bantu?" }
-        ];
-        
+        let data = JSON.parse(localStorage.getItem('bot_data')) || [{keyword: "halo", response: "Halo, selamat datang!"}];
         tbody.innerHTML = "";
-        data.forEach((item, index) => {
-            tbody.innerHTML += `
-                <tr>
-                    <td data-label="Keyword"><code>${item.keyword}</code></td>
-                    <td data-label="Jawaban">${item.response}</td>
-                    <td data-label="Hapus">
-                        <button class="btn-delete" onclick="deleteKnowledge(${index})"><i class="fas fa-trash"></i></button>
-                    </td>
-                </tr>
-            `;
+        data.forEach((item, i) => {
+            tbody.innerHTML += `<tr>
+                <td data-label="Keyword"><code>${item.keyword}</code></td>
+                <td data-label="Jawaban">${item.response}</td>
+                <td data-label="Hapus"><button class="btn-delete" onclick="deleteKnowledge(${i})"><i class="fas fa-trash"></i></button></td>
+            </tr>`;
         });
     }
 
@@ -337,13 +346,13 @@
         loadBotKnowledge();
     }
 
-    window.onload = () => {
-        if(sessionStorage.getItem("logged")) {
-            document.getElementById('login-overlay').style.display = 'none';
-            document.getElementById('dashboard').classList.add('active');
-            loadBotKnowledge();
-        }
-    }
+    function initData() { loadCars(); loadBotKnowledge(); }
+
+    window.onload = () => { if(sessionStorage.getItem("logged")) { 
+        document.getElementById('login-overlay').style.display = 'none'; 
+        document.getElementById('dashboard').classList.add('active'); 
+        initData(); 
+    }};
 </script>
 </body>
 </html>
