@@ -114,7 +114,7 @@
         
         <form id="formTambahMobil">
             <div class="form-group">
-                <label>Foto-foto Mobil (Bisa pilih banyak sekaligus)</label>
+                <label>Foto-foto Mobil (Pilih minimal satu)</label>
                 <input type="file" id="fotoMobil" accept="image/jpeg, image/png" multiple onchange="previewImages(event)">
                 <div id="galleryPreview" class="preview-gallery"></div>
             </div>
@@ -156,7 +156,7 @@
 
                 <div class="form-group">
                     <label>Harga (Input angka saja)</label>
-                    <input type="text" id="hargaInput" placeholder="Contoh: 2500000000" oninput="formatRupiah(this)">
+                    <input type="text" id="hargaInput" placeholder="Contoh: 250000000" oninput="formatRupiah(this)">
                     <p id="formattedHarga" style="font-size: 12px; color: var(--gold); margin-top: 5px;">Rp 0</p>
                 </div>
             </div>
@@ -171,6 +171,7 @@
 <script>
     let uploadedImages = [];
 
+    // Fungsi Preview dan konversi ke Base64
     function previewImages(event) {
         const previewContainer = document.getElementById('galleryPreview');
         previewContainer.innerHTML = ""; 
@@ -185,6 +186,7 @@
                     img.src = e.target.result;
                     img.classList.add('preview-item');
                     previewContainer.appendChild(img);
+                    // Simpan string Base64 ke array
                     uploadedImages.push(e.target.result);
                 };
                 reader.readAsDataURL(file);
@@ -192,6 +194,7 @@
         }
     }
 
+    // Load Pilihan Tahun
     const selectTahun = document.getElementById('tahunMobil');
     const currentYear = new Date().getFullYear();
     for (let i = currentYear; i >= currentYear - 20; i--) {
@@ -200,7 +203,6 @@
         selectTahun.appendChild(opt);
     }
 
-    // DATA MOBIL SESUAI PERMINTAAN
     const carData = {
         "MPV": [
             {nama: "Toyota Avanza", deskripsi: "Mesin 1.5L Dual VVT-i, Kapasitas 7 Penumpang."},
@@ -242,7 +244,6 @@
     function updateMerek() {
         const jenis = document.getElementById('jenisMobil').value;
         const merekSelect = document.getElementById('merekMobil');
-        
         merekSelect.innerHTML = '<option value="">-- Pilih Merek --</option>';
 
         if (jenis && carData[jenis]) {
@@ -263,11 +264,9 @@
     function updateSpecs() {
         const merekSelect = document.getElementById('merekMobil');
         const selectedOption = merekSelect.options[merekSelect.selectedIndex];
-        const output = document.getElementById('specsOutput');
-        
         if (selectedOption && selectedOption.dataset.spec) {
             const specText = selectedOption.dataset.spec;
-            output.innerHTML = specText;
+            document.getElementById('specsOutput').innerHTML = specText;
             document.getElementById('spesifikasiHidden').value = specText;
         }
     }
@@ -282,26 +281,40 @@
     }
 
     function simpanUnit() {
-        const unitBaru = {
-            type: document.getElementById('jenisMobil').value,
-            name: document.getElementById('merekMobil').value,
-            price: document.getElementById('formattedHarga').innerText,
-            images: uploadedImages, 
-            year: document.getElementById('tahunMobil').value,
-            spec: document.getElementById('spesifikasiHidden').value
-        };
+        const namaMobil = document.getElementById('merekMobil').value;
+        const hargaTeks = document.getElementById('formattedHarga').innerText;
+        const tahun = document.getElementById('tahunMobil').value;
+        const spek = document.getElementById('spesifikasiHidden').value;
+        const jenis = document.getElementById('jenisMobil').value;
 
-        if(!unitBaru.name || uploadedImages.length === 0) {
-            alert("Harap lengkapi data dan pilih minimal satu foto!");
+        // Validasi minimal
+        if(!namaMobil || uploadedImages.length === 0) {
+            alert("Mohon lengkapi Merek Mobil dan pilih minimal satu foto!");
             return;
         }
 
-        let stokLama = JSON.parse(localStorage.getItem('car_stok')) || [];
-        stokLama.push(unitBaru);
-        localStorage.setItem('car_stok', JSON.stringify(stokLama));
-        
-        alert("Berhasil! Unit " + unitBaru.name + " telah disimpan.");
-        window.location.href = "admin-jaya.html";
+        const unitBaru = {
+            type: jenis,
+            name: namaMobil,
+            price: hargaTeks,
+            img: uploadedImages[0], // Foto utama
+            images: uploadedImages, // Semua foto
+            year: tahun,
+            spec: spek,
+            fuel: "Bensin"
+        };
+
+        try {
+            let stok = JSON.parse(localStorage.getItem('car_stok')) || [];
+            stok.push(unitBaru);
+            localStorage.setItem('car_stok', JSON.stringify(stok));
+            
+            alert("Berhasil! Unit " + namaMobil + " telah disimpan.");
+            window.location.href = "admin-jaya.html";
+        } catch (e) {
+            alert("Gagal menyimpan! Ukuran foto mungkin terlalu besar untuk memori browser.");
+            console.error(e);
+        }
     }
 </script>
 </body>
