@@ -19,7 +19,7 @@
         html { scroll-behavior: smooth; }
         body { background-color: var(--dark-bg); color: var(--text-light); overflow-x: hidden; line-height: 1.6; }
 
-        /* --- PRELOADER STYLE --- */
+        /* --- PRELOADER STYLE UPDATED --- */
         #preloader {
             position: fixed;
             top: 0; left: 0;
@@ -34,7 +34,9 @@
 
         .loader-container {
             position: relative;
-            width: 200px; height: 200px;
+            /* Container diperbesar menjadi 300px agar megah */
+            width: 300px; 
+            height: 300px;
             display: flex;
             justify-content: center;
             align-items: center;
@@ -43,17 +45,18 @@
         .loader-circle {
             position: absolute;
             width: 100%; height: 100%;
-            border: 4px solid rgba(212, 175, 55, 0.1);
-            border-top: 4px solid var(--gold);
+            border: 5px solid rgba(212, 175, 55, 0.1);
+            border-top: 5px solid var(--gold);
             border-radius: 50%;
             animation: spin-circle 1.5s linear infinite;
         }
 
         .loader-logo {
-            width: 120px; 
-            height: 120px;
+            /* Ukuran logo diperbesar menjadi 220px agar proporsional */
+            width: 220px; 
+            height: 220px;
             object-fit: contain;
-            filter: drop-shadow(0 0 10px rgba(212, 175, 55, 0.5));
+            filter: drop-shadow(0 0 15px rgba(212, 175, 55, 0.6));
             animation: spin-logo 3s ease-in-out infinite;
         }
 
@@ -64,7 +67,7 @@
 
         @keyframes spin-logo {
             0% { transform: rotate(0deg) scale(1); }
-            20% { transform: rotate(360deg) scale(1.1); }
+            50% { transform: rotate(360deg) scale(1.1); } /* Putaran penuh dengan efek denyut */
             100% { transform: rotate(360deg) scale(1); }
         }
 
@@ -200,11 +203,12 @@
 
         footer { padding: 30px; background: #050505; text-align: center; font-size: 0.8rem; opacity: 0.6; }
 
+        /* --- RESPONSIVE ADJUSTMENTS --- */
         @media (max-width: 600px) {
             .hero h1 { font-size: 2.2rem; }
             .catalog-grid { padding: 10px; }
-            .loader-container { width: 150px; height: 150px; }
-            .loader-logo { width: 90px; height: 90px; }
+            .loader-container { width: 220px; height: 220px; }
+            .loader-logo { width: 160px; height: 160px; }
         }
     </style>
 </head>
@@ -302,7 +306,6 @@
             let mediaContent = "";
             let displayImg = "";
 
-            // Prioritas Gambar: Base64 -> Link Foto -> Youtube Thumb -> Placeholder
             if (car.img && car.img.startsWith("data:image")) {
                 displayImg = car.img;
             } else if (car.foto) {
@@ -314,7 +317,6 @@
                 displayImg = 'https://via.placeholder.com/400x250.png?text=Foto+Tidak+Tersedia';
             }
 
-            // Jika ada video YouTube, tampilkan iframe, jika tidak tampilkan gambar
             if (ytEmbed) {
                 mediaContent = `<iframe src="${ytEmbed}" allowfullscreen></iframe>`;
             } else {
@@ -344,7 +346,6 @@
         const lbMedia = document.getElementById('lightbox-media');
         const ytEmbed = formatYoutube(car.video);
         
-        // Logika Gambar yang sama dengan Katalog
         let displayImg = (car.img && car.img.startsWith('data:image')) ? car.img : (car.foto || 'https://via.placeholder.com/600x400.png?text=No+Image');
 
         if (ytEmbed) {
