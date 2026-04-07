@@ -62,7 +62,6 @@
             transition: 0.3s;
         }
 
-        /* --- GALLERY PREVIEW STYLE --- */
         .preview-gallery {
             display: grid;
             grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
@@ -167,28 +166,23 @@
 </div>
 
 <script>
-    // Array untuk menampung semua string base64 gambar
     let uploadedImages = [];
 
     // 1. PREVIEW MULTI GAMBAR
     function previewImages(event) {
         const previewContainer = document.getElementById('galleryPreview');
-        previewContainer.innerHTML = ""; // Reset preview
-        uploadedImages = []; // Reset array data
+        previewContainer.innerHTML = ""; 
+        uploadedImages = []; 
         
         const files = event.target.files;
-
         if (files) {
             Array.from(files).forEach(file => {
                 const reader = new FileReader();
                 reader.onload = function(e) {
-                    // Tampilkan di UI
                     const img = document.createElement('img');
                     img.src = e.target.result;
                     img.classList.add('preview-item');
                     previewContainer.appendChild(img);
-                    
-                    // Simpan data untuk database
                     uploadedImages.push(e.target.result);
                 };
                 reader.readAsDataURL(file);
@@ -196,21 +190,7 @@
         }
     }
 
-    // 2. DATA KATALOG (Sama seperti sebelumnya)
-    const carData = {
-        "Sedan": {
-            "Honda Civic RS": "Mesin 1.5L VTEC Turbo, 178 PS, Honda Sensing.",
-            "Toyota Camry": "Mesin 2.5L, Transmisi Otomatis 8-Speed, Mewah.",
-            "BMW 320i": "Mesin 2.0L TwinPower Turbo, RWD, iDrive 7.0."
-        },
-        "SUV": {
-            "Pajero Sport": "Mesin 2.4L MIVEC Turbo Diesel, 181 PS, 4x4.",
-            "Toyota Fortuner": "Mesin 2.8L Diesel, Power 203 PS, Gagah.",
-            "Honda CR-V": "Mesin 1.5L Turbo, 7 Seater, Sunroof."
-        }
-    };
-
-    // 3. GENERATE TAHUN
+    // 2. GENERATE TAHUN
     const selectTahun = document.getElementById('tahunMobil');
     const currentYear = new Date().getFullYear();
     for (let i = currentYear; i >= currentYear - 20; i--) {
@@ -219,26 +199,54 @@
         selectTahun.appendChild(opt);
     }
 
-    function updateMerek() {
+    // 3. FUNGSI UPDATE MEREK (API VERSION)
+    async function updateMerek() {
         const jenis = document.getElementById('jenisMobil').value;
         const merekSelect = document.getElementById('merekMobil');
-        merekSelect.innerHTML = '<option value="">-- Pilih Merek --</option>';
-        if (jenis && carData[jenis]) {
+        
+        // Reset dan tampilkan status loading
+        merekSelect.innerHTML = '<option value="">-- Meload Data... --</option>';
+        
+        if (!jenis) {
+            merekSelect.disabled = true;
+            merekSelect.innerHTML = '<option value="">-- Pilih Jenis Dahulu --</option>';
+            return;
+        }
+
+        try {
+            // GANTI URL INI dengan endpoint API asli kamu
+            // Contoh: fetch(`https://api.jayamobil.com/merek?jenis=${jenis}`)
+            const response = await fetch(`https://api.jayamobil.com/merek?jenis=${jenis}`);
+            const data = await response.json();
+
+            merekSelect.innerHTML = '<option value="">-- Pilih Merek --</option>';
             merekSelect.disabled = false;
-            Object.keys(carData[jenis]).forEach(merek => {
+
+            // Pastikan struktur JSON API kamu adalah Array of Objects: [{nama: "Civic", spek: "..."}, ...]
+            data.forEach(merek => {
                 let opt = document.createElement('option');
-                opt.value = merek; opt.innerHTML = merek;
+                opt.value = merek.nama; 
+                opt.innerHTML = merek.nama;
+                // Simpan spek di dataset agar bisa diambil saat updateSpecs()
+                opt.dataset.spec = merek.deskripsi || "Spesifikasi standar tersedia."; 
                 merekSelect.appendChild(opt);
             });
-        } else { merekSelect.disabled = true; }
+        } catch (error) {
+            console.error("Gagal mengambil data API:", error);
+            // Fallback jika API gagal (untuk testing)
+            merekSelect.innerHTML = '<option value="">-- Error Memuat Data --</option>';
+            alert("Gagal memuat daftar merek dari server.");
+        }
     }
 
+    // 4. UPDATE SPECS (Diambil dari atribut data di option)
     function updateSpecs() {
-        const jenis = document.getElementById('jenisMobil').value;
-        const merek = document.getElementById('merekMobil').value;
+        const merekSelect = document.getElementById('merekMobil');
+        const selectedOption = merekSelect.options[merekSelect.selectedIndex];
         const output = document.getElementById('specsOutput');
-        if (merek && carData[jenis][merek]) {
-            const specText = carData[jenis][merek];
+        
+        if (selectedOption && selectedOption.dataset.spec) {
+            const specText = selectedOption.dataset.spec;
             output.innerHTML = specText;
             document.getElementById('spesifikasiHidden').value = specText;
         }
@@ -253,12 +261,12 @@
         document.getElementById('formattedHarga').innerText = formatted;
     }
 
-    // 4. SIMPAN DATA
+    // 5. SIMPAN DATA
     function simpanUnit() {
         const unitBaru = {
             name: document.getElementById('merekMobil').value,
-            price: document.getElementById('formattedHarga').innerText.replace("Rp", ""),
-            images: uploadedImages, // Sekarang menyimpan ARRAY GAMBAR
+            price: document.getElementById('formattedHarga').innerText.replace("Rp", "").trim(),
+            images: uploadedImages, 
             year: document.getElementById('tahunMobil').value,
             spec: document.getElementById('spesifikasiHidden').value
         };
@@ -272,7 +280,7 @@
         stokLama.push(unitBaru);
         localStorage.setItem('car_stok', JSON.stringify(stokLama));
         
-        alert("Berhasil! " + uploadedImages.length + " foto unit telah disimpan.");
+        alert("Berhasil! Unit " + unitBaru.name + " telah disimpan.");
         window.location.href = "admin-jaya.html";
     }
 </script>
