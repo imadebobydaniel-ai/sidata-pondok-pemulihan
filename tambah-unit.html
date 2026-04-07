@@ -23,7 +23,6 @@
             display: flex;
         }
 
-        /* Sidebar Styling Sederhana */
         .sidebar {
             width: 250px;
             height: 100vh;
@@ -63,16 +62,20 @@
             transition: 0.3s;
         }
 
-        select:focus, input:focus { border-color: var(--gold); }
+        /* --- GALLERY PREVIEW STYLE --- */
+        .preview-gallery {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+            gap: 10px;
+            margin-top: 15px;
+        }
 
-        .preview-img {
+        .preview-item {
             width: 100%;
-            max-height: 300px;
+            height: 100px;
             object-fit: cover;
             border-radius: 8px;
-            margin-top: 10px;
-            display: none;
-            border: 2px dashed #444;
+            border: 2px solid #444;
         }
 
         .btn-simpan {
@@ -88,15 +91,12 @@
             transition: 0.3s;
         }
 
-        .btn-simpan:hover { opacity: 0.8; transform: translateY(-2px); }
-
         .spec-box {
             background: #111;
             padding: 15px;
             border-radius: 8px;
             border-left: 4px solid var(--gold);
             font-size: 14px;
-            line-height: 1.6;
         }
     </style>
 </head>
@@ -115,9 +115,9 @@
         
         <form id="formTambahMobil">
             <div class="form-group">
-                <label>Foto Mobil (JPG/PNG)</label>
-                <input type="file" id="fotoMobil" accept="image/jpeg, image/png" onchange="previewImage(event)">
-                <img id="imgPreview" class="preview-img">
+                <label>Foto-foto Mobil (Bisa pilih banyak sekaligus)</label>
+                <input type="file" id="fotoMobil" accept="image/jpeg, image/png" multiple onchange="previewImages(event)">
+                <div id="galleryPreview" class="preview-gallery"></div>
             </div>
 
             <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px;">
@@ -149,8 +149,7 @@
             <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px;">
                 <div class="form-group">
                     <label>Tahun Mobil</label>
-                    <select id="tahunMobil">
-                    </select>
+                    <select id="tahunMobil"></select>
                 </div>
 
                 <div class="form-group">
@@ -168,80 +167,76 @@
 </div>
 
 <script>
-    // --- LOGIKA SESSION STORAGE (DITAMBAHKAN) ---
-    window.onload = function() {
-        const savedNama = sessionStorage.getItem('temp_nama');
-        const savedHarga = sessionStorage.getItem('temp_harga');
+    // Array untuk menampung semua string base64 gambar
+    let uploadedImages = [];
 
-        if (savedNama) {
-            console.log("Melanjutkan input untuk: " + savedNama);
-            
-            // Mengisi input harga jika ada data dari dashboard
-            if (savedHarga) {
-                const hInput = document.getElementById('hargaInput');
-                hInput.value = savedHarga;
-                formatRupiah(hInput);
-            }
+    // 1. PREVIEW MULTI GAMBAR
+    function previewImages(event) {
+        const previewContainer = document.getElementById('galleryPreview');
+        previewContainer.innerHTML = ""; // Reset preview
+        uploadedImages = []; // Reset array data
+        
+        const files = event.target.files;
 
-            // Opsional: Hapus setelah digunakan agar tidak muncul terus saat refresh
-            sessionStorage.removeItem('temp_nama');
-            sessionStorage.removeItem('temp_harga');
+        if (files) {
+            Array.from(files).forEach(file => {
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    // Tampilkan di UI
+                    const img = document.createElement('img');
+                    img.src = e.target.result;
+                    img.classList.add('preview-item');
+                    previewContainer.appendChild(img);
+                    
+                    // Simpan data untuk database
+                    uploadedImages.push(e.target.result);
+                };
+                reader.readAsDataURL(file);
+            });
         }
-    };
+    }
 
-    // 1. DATA SIMULASI API (Katalog Data)
+    // 2. DATA KATALOG (Sama seperti sebelumnya)
     const carData = {
         "Sedan": {
-            "Honda Civic RS": "Mesin 1.5L VTEC Turbo, 178 PS, Honda Sensing, Interior Leather.",
-            "Toyota Camry": "Mesin 2.5L A25A-FKS, Transmisi Otomatis 8-Speed, Mewah & Elegan.",
-            "BMW 320i": "Mesin 2.0L TwinPower Turbo, RWD, iDrive 7.0, Sporty Luxury."
+            "Honda Civic RS": "Mesin 1.5L VTEC Turbo, 178 PS, Honda Sensing.",
+            "Toyota Camry": "Mesin 2.5L, Transmisi Otomatis 8-Speed, Mewah.",
+            "BMW 320i": "Mesin 2.0L TwinPower Turbo, RWD, iDrive 7.0."
         },
         "SUV": {
-            "Pajero Sport": "Mesin 2.4L MIVEC Turbo Diesel, 181 PS, 4x2/4x4, Tangguh di segala medan.",
-            "Toyota Fortuner": "Mesin 2.8L Diesel, Power 203 PS, Fitur Keamanan Lengkap.",
-            "Honda CR-V": "Mesin 1.5L Turbo, 7 Seater, Panoramic Sunroof."
-        },
-        "Sport": {
-            "Porsche 911": "Mesin 3.0L Flat-6 Twin-Turbo, Akselerasi 0-100 km/j dalam 3.4 detik.",
-            "Toyota GR Supra": "Mesin 3.0L Inline-6, 340 HP, Hasil kolaborasi legendaris.",
-            "BMW M4": "Mesin M TwinPower Turbo, 510 HP, Carbon Fiber Roof."
+            "Pajero Sport": "Mesin 2.4L MIVEC Turbo Diesel, 181 PS, 4x4.",
+            "Toyota Fortuner": "Mesin 2.8L Diesel, Power 203 PS, Gagah.",
+            "Honda CR-V": "Mesin 1.5L Turbo, 7 Seater, Sunroof."
         }
     };
 
-    // 2. GENERATE TAHUN (20 Tahun Terakhir)
+    // 3. GENERATE TAHUN
     const selectTahun = document.getElementById('tahunMobil');
     const currentYear = new Date().getFullYear();
     for (let i = currentYear; i >= currentYear - 20; i--) {
         let opt = document.createElement('option');
-        opt.value = i;
-        opt.innerHTML = i;
+        opt.value = i; opt.innerHTML = i;
         selectTahun.appendChild(opt);
     }
 
-    // 3. LOGIKA DROPDOWN OTOMATIS
     function updateMerek() {
         const jenis = document.getElementById('jenisMobil').value;
         const merekSelect = document.getElementById('merekMobil');
         merekSelect.innerHTML = '<option value="">-- Pilih Merek --</option>';
-        
         if (jenis && carData[jenis]) {
             merekSelect.disabled = false;
             Object.keys(carData[jenis]).forEach(merek => {
                 let opt = document.createElement('option');
-                opt.value = merek;
-                opt.innerHTML = merek;
+                opt.value = merek; opt.innerHTML = merek;
                 merekSelect.appendChild(opt);
             });
-        } else {
-            merekSelect.disabled = true;
-        }
+        } else { merekSelect.disabled = true; }
     }
 
     function updateSpecs() {
         const jenis = document.getElementById('jenisMobil').value;
         const merek = document.getElementById('merekMobil').value;
         const output = document.getElementById('specsOutput');
-        
         if (merek && carData[jenis][merek]) {
             const specText = carData[jenis][merek];
             output.innerHTML = specText;
@@ -249,41 +244,27 @@
         }
     }
 
-    // 4. FORMAT HARGA RUPIAH
     function formatRupiah(input) {
         let value = input.value.replace(/\D/g, "");
         input.value = value;
         let formatted = new Intl.NumberFormat('id-ID', {
-            style: 'currency',
-            currency: 'IDR',
-            minimumFractionDigits: 0
+            style: 'currency', currency: 'IDR', minimumFractionDigits: 0
         }).format(value || 0);
         document.getElementById('formattedHarga').innerText = formatted;
     }
 
-    // 5. PREVIEW GAMBAR
-    function previewImage(event) {
-        const reader = new FileReader();
-        reader.onload = function(){
-            const output = document.getElementById('imgPreview');
-            output.src = reader.result;
-            output.style.display = 'block';
-        };
-        reader.readAsDataURL(event.target.files[0]);
-    }
-
-    // 6. SIMPAN DATA (Local Storage)
+    // 4. SIMPAN DATA
     function simpanUnit() {
         const unitBaru = {
             name: document.getElementById('merekMobil').value,
             price: document.getElementById('formattedHarga').innerText.replace("Rp", ""),
-            img: document.getElementById('imgPreview').src,
+            images: uploadedImages, // Sekarang menyimpan ARRAY GAMBAR
             year: document.getElementById('tahunMobil').value,
             spec: document.getElementById('spesifikasiHidden').value
         };
 
-        if(!unitBaru.name || !unitBaru.price || unitBaru.price == " 0") {
-            alert("Harap lengkapi semua data!");
+        if(!unitBaru.name || uploadedImages.length === 0) {
+            alert("Harap pilih merek dan minimal satu foto!");
             return;
         }
 
@@ -291,10 +272,9 @@
         stokLama.push(unitBaru);
         localStorage.setItem('car_stok', JSON.stringify(stokLama));
         
-        alert("Unit Berhasil Ditambahkan ke Katalog!");
+        alert("Berhasil! " + uploadedImages.length + " foto unit telah disimpan.");
         window.location.href = "admin-jaya.html";
     }
 </script>
-
 </body>
 </html>
