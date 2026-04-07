@@ -19,6 +19,55 @@
         html { scroll-behavior: smooth; }
         body { background-color: var(--dark-bg); color: var(--text-light); overflow-x: hidden; line-height: 1.6; }
 
+        /* --- PRELOADER STYLE --- */
+        #preloader {
+            position: fixed;
+            top: 0; left: 0;
+            width: 100%; height: 100%;
+            background-color: var(--dark-bg);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 9999;
+            transition: opacity 0.5s ease, visibility 0.5s;
+        }
+
+        .loader-container {
+            position: relative;
+            width: 150px; height: 150px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .loader-circle {
+            position: absolute;
+            width: 100%; height: 100%;
+            border: 4px solid rgba(212, 175, 55, 0.1);
+            border-top: 4px solid var(--gold);
+            border-radius: 50%;
+            animation: spin-circle 1.5s linear infinite;
+        }
+
+        .loader-logo {
+            width: 80px; height: 80px;
+            object-fit: contain;
+            animation: spin-logo 3s ease-in-out infinite;
+        }
+
+        @keyframes spin-circle {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        @keyframes spin-logo {
+            0% { transform: rotate(0deg); }
+            20% { transform: rotate(360deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .loader-hidden { opacity: 0; visibility: hidden; }
+
         /* --- NAVBAR --- */
         header {
             background: rgba(10, 10, 10, 0.9);
@@ -105,44 +154,37 @@
         }
         .car-card:hover { border-color: var(--gold); transform: translateY(-5px); }
 
-        .img-wrapper { width: 100%; height: 200px; overflow: hidden; }
-        .img-wrapper img { width: 100%; height: 100%; object-fit: cover; transition: 0.5s; }
-        .car-card:hover .img-wrapper img { transform: scale(1.1); }
+        .media-wrapper { width: 100%; height: 200px; overflow: hidden; background: #000; position: relative; }
+        .media-wrapper img, .media-wrapper iframe { width: 100%; height: 100%; object-fit: cover; border: none; }
 
         .info { padding: 20px; }
         .info h3 { margin-bottom: 8px; font-size: 1.2rem; }
         .price { color: var(--gold); font-size: 1.3rem; font-weight: bold; }
         .spec { display: flex; gap: 15px; margin-top: 12px; color: #888; font-size: 0.85rem; }
 
-        /* --- ASISTEN AI (CHATBOT) --- */
+        /* --- ASISTEN AI --- */
         .chat-launcher {
             position: fixed; bottom: 20px; right: 20px; width: 65px; height: 65px;
             background: var(--gold); border-radius: 50%; cursor: pointer;
             z-index: 3000; overflow: hidden; border: 2px solid var(--gold);
-            transition: 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-            box-shadow: 0 5px 15px rgba(0,0,0,0.5);
+            transition: 0.3s; box-shadow: 0 5px 15px rgba(0,0,0,0.5);
         }
         .chat-launcher img { width: 100%; height: 100%; object-fit: cover; }
-        .chat-launcher:hover { transform: scale(1.1); }
 
         .chat-window {
             position: fixed; bottom: 95px; right: 20px; width: 320px; height: 420px;
             background: #111; border-radius: 15px; display: none; flex-direction: column;
             z-index: 3000; box-shadow: 0 10px 30px rgba(0,0,0,0.5);
-            border: 1px solid rgba(212, 175, 55, 0.3); animation: fadeIn 0.3s ease;
+            border: 1px solid rgba(212, 175, 55, 0.3);
         }
-        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
 
-        .chat-header {
-            background: var(--gold); padding: 12px; color: black; font-weight: bold;
-            display: flex; justify-content: space-between; align-items: center; border-radius: 15px 15px 0 0;
-        }
+        .chat-header { background: var(--gold); padding: 12px; color: black; font-weight: bold; display: flex; justify-content: space-between; border-radius: 15px 15px 0 0; }
         .chat-body { flex: 1; padding: 15px; overflow-y: auto; display: flex; flex-direction: column; gap: 10px; }
         .msg { padding: 8px 12px; border-radius: 12px; font-size: 13px; max-width: 85%; }
         .bot-msg { background: #222; color: white; align-self: flex-start; }
         .user-msg { background: var(--gold); color: black; align-self: flex-end; }
         .chat-footer { padding: 10px; display: flex; gap: 5px; background: #1a1a1a; border-radius: 0 0 15px 15px; }
-        .chat-footer input { flex: 1; background: #000; border: none; padding: 8px; color: white; border-radius: 5px; outline: none; }
+        .chat-footer input { flex: 1; background: #000; border: none; padding: 8px; color: white; outline: none; }
 
         /* --- LIGHTBOX --- */
         #lightbox {
@@ -150,23 +192,26 @@
             width: 100%; height: 100%; background: rgba(0,0,0,0.95);
             justify-content: center; align-items: center; flex-direction: column;
         }
-        #lightbox-img { max-width: 85%; max-height: 70%; border: 2px solid var(--gold); border-radius: 10px; }
+        #lightbox-media { max-width: 85%; max-height: 70%; border: 2px solid var(--gold); border-radius: 10px; overflow: hidden; }
         .lb-info { margin-top: 20px; text-align: center; }
-        .lb-info h2 { color: var(--gold); }
         .close-btn { position: absolute; top: 20px; right: 30px; font-size: 40px; color: white; cursor: pointer; }
-        .nav-btn { position: absolute; top: 50%; color: var(--gold); font-size: 40px; cursor: pointer; padding: 15px; }
 
         footer { padding: 30px; background: #050505; text-align: center; font-size: 0.8rem; opacity: 0.6; }
 
         @media (max-width: 600px) {
             .hero h1 { font-size: 2.2rem; }
-            .hero-nav { gap: 10px; flex-wrap: wrap; justify-content: center; }
-            .hero-nav a { font-size: 0.75rem; }
             .catalog-grid { padding: 10px; }
         }
     </style>
 </head>
 <body>
+
+<div id="preloader">
+    <div class="loader-container">
+        <div class="loader-circle"></div>
+        <img src="logo-jaya.png" alt="JAYA MOBIL" class="loader-logo" onerror="this.style.display='none'">
+    </div>
+</div>
 
 <header>
     <div class="logo-container">
@@ -190,8 +235,7 @@
 
 <section class="catalog" id="katalog">
     <h2 class="section-title">UNIT <span>TERBARU KAMI</span></h2>
-    <div class="catalog-grid" id="main-catalog">
-        </div>
+    <div class="catalog-grid" id="main-catalog"></div>
 </section>
 
 <footer id="kontak">
@@ -200,13 +244,11 @@
 
 <div id="lightbox">
     <span class="close-btn" onclick="closeLightbox()">&times;</span>
-    <i class="fas fa-chevron-left nav-btn" style="left:10px" onclick="changeSlide(-1)"></i>
-    <img id="lightbox-img" src="">
+    <div id="lightbox-media"></div>
     <div class="lb-info">
-        <h2 id="lb-title">Nama Mobil</h2>
+        <h2 id="lb-title" style="color:var(--gold)">Nama Mobil</h2>
         <p id="lb-price" class="price">Harga</p>
     </div>
-    <i class="fas fa-chevron-right nav-btn" style="right:10px" onclick="changeSlide(1)"></i>
 </div>
 
 <div class="chat-launcher" onclick="toggleChat()">
@@ -230,15 +272,66 @@
 </div>
 
 <script>
-    // 1. VARIABEL GLOBAL
     let carsData = [];
-    let currentIndex = 0;
+    let uploadedImages = []; // Untuk menyimpan hasil kompresi Base64
 
-    // 2. FUNGSI LOAD KATALOG
+    // --- FUNGSI KOMPRESI GAMBAR (DITAMBAHKAN) ---
+    function previewImages(event) {
+        const previewContainer = document.getElementById('galleryPreview');
+        if (previewContainer) previewContainer.innerHTML = ""; 
+        uploadedImages = []; 
+        
+        const files = event.target.files;
+        if (files) {
+            Array.from(files).forEach(file => {
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    const imgElement = new Image();
+                    imgElement.src = e.target.result;
+                    
+                    imgElement.onload = function() {
+                        const canvas = document.createElement('canvas');
+                        const MAX_WIDTH = 800; // Standar agar tidak berat di HP
+                        const scaleSize = MAX_WIDTH / imgElement.width;
+                        canvas.width = MAX_WIDTH;
+                        canvas.height = imgElement.height * scaleSize;
+
+                        const ctx = canvas.getContext('2d');
+                        ctx.drawImage(imgElement, 0, 0, canvas.width, canvas.height);
+
+                        // Kompresi ke format JPEG kualitas 0.7
+                        const compressedBase64 = canvas.toDataURL('image/jpeg', 0.7);
+                        
+                        // Opsional: Tampilkan preview jika elemen ada
+                        if (previewContainer) {
+                            const previewImg = document.createElement('img');
+                            previewImg.src = compressedBase64;
+                            previewImg.style.width = "100px";
+                            previewImg.style.margin = "5px";
+                            previewImg.classList.add('preview-item');
+                            previewContainer.appendChild(previewImg);
+                        }
+                        
+                        uploadedImages.push(compressedBase64);
+                        console.log("Gambar berhasil dikompresi.");
+                    };
+                };
+                reader.readAsDataURL(file);
+            });
+        }
+    }
+
+    // Fungsi Format Link YouTube
+    function formatYoutube(url) {
+        if (!url) return null;
+        const regExp = /^.*(youtu.be\/|v\/|u\/\w\/|embed\/|watch\?v=|\&v=)([^#\&\?]*).*/;
+        const match = url.match(regExp);
+        return (match && match[2].length === 11) ? `https://www.youtube.com/embed/${match[2]}` : null;
+    }
+
     function loadKatalog() {
         carsData = JSON.parse(localStorage.getItem('car_stok')) || [];
         const container = document.getElementById('main-catalog');
-
         if (!container) return;
 
         if (carsData.length === 0) {
@@ -247,18 +340,23 @@
         }
 
         container.innerHTML = carsData.map((car, index) => {
-            // Cek apakah gambar valid Base64
-            const isBase64 = car.img && car.img.startsWith('data:image');
-            const displayImg = isBase64 ? car.img : 'https://placehold.co/400x250?text=Foto+Tidak+Tersedia';
+            const ytEmbed = formatYoutube(car.video);
+            let mediaContent = "";
+
+            if (ytEmbed) {
+                mediaContent = `<iframe src="${ytEmbed}" allowfullscreen></iframe>`;
+            } else {
+                // Gunakan placeholder jika gambar rusak atau tidak ada
+                const img = (car.img && car.img.startsWith('data:image')) ? car.img : 'https://placehold.co/400x250?text=Gambar+Tidak+Tersedia';
+                mediaContent = `<img src="${img}" alt="${car.name}" onerror="this.src='https://placehold.co/400x250?text=Error+Loading+Image'">`;
+            }
 
             return `
-                <div class="car-card" onclick="openLightbox(${index})">
-                    <div class="img-wrapper">
-                        <img src="${displayImg}" 
-                             alt="${car.name}" 
-                             onerror="this.src='https://placehold.co/400x250?text=Gagal+Memuat+Gambar'">
+                <div class="car-card">
+                    <div class="media-wrapper" onclick="openLightbox(${index})">
+                        ${mediaContent}
                     </div>
-                    <div class="info">
+                    <div class="info" onclick="openLightbox(${index})">
                         <h3>${car.name}</h3>
                         <div class="price">Rp ${car.price}</div>
                         <div class="spec">
@@ -271,39 +369,29 @@
         }).join('');
     }
 
-    // 3. FUNGSI LIGHTBOX (POPUP)
     function openLightbox(index) {
-        currentIndex = index;
-        updateLightbox();
+        const car = carsData[index];
+        const lbMedia = document.getElementById('lightbox-media');
+        const ytEmbed = formatYoutube(car.video);
+
+        if (ytEmbed) {
+            lbMedia.innerHTML = `<iframe width="560" height="315" src="${ytEmbed}?autoplay=1" frameborder="0" allowfullscreen></iframe>`;
+        } else {
+            lbMedia.innerHTML = `<img src="${car.img}" style="width:100%" onerror="this.src='https://placehold.co/400x250?text=No+Image'">`;
+        }
+
+        document.getElementById('lb-title').innerText = car.name;
+        document.getElementById('lb-price').innerText = "Rp " + car.price;
         document.getElementById('lightbox').style.display = 'flex';
         document.body.style.overflow = 'hidden';
     }
 
     function closeLightbox() {
         document.getElementById('lightbox').style.display = 'none';
+        document.getElementById('lightbox-media').innerHTML = "";
         document.body.style.overflow = 'auto';
     }
 
-    function changeSlide(dir) {
-        if (carsData.length === 0) return;
-        currentIndex += dir;
-        if (currentIndex >= carsData.length) currentIndex = 0;
-        if (currentIndex < 0) currentIndex = carsData.length - 1;
-        updateLightbox();
-    }
-
-    function updateLightbox() {
-        const car = carsData[currentIndex];
-        if (!car) return;
-        const isBase64 = car.img && car.img.startsWith('data:image');
-        const imgPath = isBase64 ? car.img : 'https://placehold.co/400x250?text=Gambar+Tidak+Tersedia';
-        
-        document.getElementById('lightbox-img').src = imgPath;
-        document.getElementById('lb-title').innerText = car.name;
-        document.getElementById('lb-price').innerText = "Rp " + car.price;
-    }
-
-    // 4. ASISTEN AI (CHATBOT)
     function toggleChat() {
         const chat = document.getElementById('chatWindow');
         chat.style.display = (chat.style.display === 'flex') ? 'none' : 'flex';
@@ -326,22 +414,21 @@
         setTimeout(() => {
             const bDiv = document.createElement('div');
             bDiv.className = 'msg bot-msg';
-            
-            if (val.includes("harga")) bDiv.innerText = "Harga unit di JAYA MOBIL sangat kompetitif, silakan klik pada unit untuk detailnya.";
-            else if (val.includes("lokasi")) bDiv.innerText = "Showroom kami berlokasi di Jayapura, Papua.";
-            else bDiv.innerText = "Terima kasih! Tim marketing kami akan segera menghubungi Anda.";
-
+            if (val.includes("harga")) bDiv.innerText = "Harga unit kami bervariasi dan kompetitif.";
+            else if (val.includes("lokasi")) bDiv.innerText = "Showroom kami berada di Jayapura, Papua.";
+            else bDiv.innerText = "Pesan diterima. Admin kami akan segera membalas.";
             body.appendChild(bDiv);
             body.scrollTop = body.scrollHeight;
         }, 800);
     }
 
-    // 5. INISIALISASI SAAT HALAMAN DIBUKA
     window.onload = () => {
         loadKatalog();
-        // Counter pengunjung sederhana
-        let v = parseInt(localStorage.getItem('visitor_count') || "1200");
-        localStorage.setItem('visitor_count', v + 1);
+        // Hide Preloader
+        const loader = document.getElementById('preloader');
+        setTimeout(() => {
+            loader.classList.add('loader-hidden');
+        }, 3000); 
     };
 </script>
 
