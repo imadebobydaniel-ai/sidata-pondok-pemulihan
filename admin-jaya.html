@@ -42,7 +42,7 @@
         .menu-item.active { background: var(--gold); color: black; font-weight: bold; }
 
         /* --- UI ELEMENTS --- */
-        .admin-section { background: var(--dark-card); padding: 25px; border-radius: 16px; border: 1px solid #222; }
+        .admin-section { background: var(--dark-card); padding: 25px; border-radius: 16px; border: 1px solid #222; margin-bottom: 25px; }
         .header-action { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; }
         .custom-table { width: 100%; border-collapse: collapse; }
         .custom-table th { text-align: left; padding: 15px; color: var(--gold); border-bottom: 2px solid #222; }
@@ -52,45 +52,44 @@
         .btn-edit { color: var(--gold); background: none; border: 1px solid var(--gold); padding: 6px 10px; border-radius: 6px; cursor: pointer; }
         .btn-delete { color: #ef4444; background: none; border: 1px solid #ef4444; padding: 6px 10px; border-radius: 6px; cursor: pointer; margin-left: 5px; }
 
-        /* --- KARTU TAMBAH UNIT CATALOG --- */
-        .card-add-catalog {
-            background: #1a1a1a;
-            border: 1px dashed var(--gold);
-            border-radius: 10px;
-            padding: 20px;
-            margin-top: 20px;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            cursor: pointer;
-            transition: 0.3s ease;
+        /* --- FORM INPUT BARU (KOTAK MERAH KOSONG) --- */
+        .form-input-card {
+            background: var(--dark-card);
+            padding: 25px;
+            border-radius: 16px;
+            border: 1px solid rgba(212, 175, 55, 0.2);
         }
-
-        .card-add-catalog:hover {
-            background: #252525;
-            transform: translateY(-3px);
-            border-style: solid;
-        }
-
-        .add-content {
-            display: flex;
-            align-items: center;
+        .form-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
             gap: 15px;
+            margin-top: 15px;
         }
-
-        .add-content i {
-            font-size: 24px;
-            color: var(--gold);
+        .input-field {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
         }
-
-        .add-content span {
-            font-size: 16px;
+        .input-field label { font-size: 13px; color: #888; }
+        .input-field input {
+            background: #0a0a0a;
+            border: 1px solid #333;
+            padding: 12px;
+            border-radius: 8px;
+            color: white;
+            outline: none;
+        }
+        .input-field input:focus { border-color: var(--gold); }
+        .btn-save-new {
+            margin-top: 20px;
+            width: 100%;
+            padding: 14px;
+            background: var(--gold);
+            color: black;
+            border: none;
+            border-radius: 8px;
             font-weight: bold;
-            color: #fff;
-        }
-
-        .card-add-catalog .fa-chevron-right {
-            color: #555;
+            cursor: pointer;
         }
 
         /* Mobile */
@@ -136,7 +135,9 @@
             <div class="admin-section">
                 <div class="header-action">
                     <h3 style="color: var(--gold); margin:0;">Katalog Stok Unit</h3>
-                    <a href="tambah-unit.html" class="btn-primary"><i class="fas fa-plus"></i> Display Utama</a>
+                    <button class="btn-primary" onclick="alert('Gunakan form di bawah untuk menambah unit baru.')">
+                        <i class="fas fa-list"></i> Display Utama
+                    </button>
                 </div>
 
                 <table class="custom-table">
@@ -150,14 +151,31 @@
                     </thead>
                     <tbody id="car-table-body"></tbody>
                 </table>
+            </div>
 
-                <div class="card-add-catalog" onclick="location.href='tambah-unit.html'">
-                    <div class="add-content">
-                        <i class="fas fa-plus-circle"></i>
-                        <span>Tambah Unit Untuk Catalog</span>
+            <div class="form-input-card">
+                <h3 style="color: var(--gold); margin: 0;"><i class="fas fa-plus-circle"></i> Input Unit Mobil Baru</h3>
+                <div class="form-grid">
+                    <div class="input-field">
+                        <label>Nama Mobil</label>
+                        <input type="text" id="new-name" placeholder="Contoh: Toyota Fortuner">
                     </div>
-                    <i class="fas fa-chevron-right"></i>
+                    <div class="input-field">
+                        <label>Tahun</label>
+                        <input type="number" id="new-year" placeholder="2025">
+                    </div>
+                    <div class="input-field">
+                        <label>Harga (Hanya Angka)</label>
+                        <input type="text" id="new-price" placeholder="1.500.000">
+                    </div>
+                    <div class="input-field">
+                        <label>Link Foto (URL)</label>
+                        <input type="text" id="new-img" placeholder="https://image-link.com/car.jpg">
+                    </div>
                 </div>
+                <button class="btn-save-new" onclick="addNewCar()">
+                    <i class="fas fa-save"></i> SIMPAN UNIT KE KATALOG
+                </button>
             </div>
         </div>
 
@@ -213,7 +231,7 @@
                     <td>${car.year || '-'}</td>
                     <td>Rp ${car.price}</td>
                     <td>
-                        <button class="btn-edit" onclick="alert('Gunakan halaman tambah unit untuk input baru.')">
+                        <button class="btn-edit" onclick="alert('Informasi: ${car.name}')">
                             <i class="fas fa-info-circle"></i>
                         </button>
                         <button class="btn-delete" onclick="deleteCar(${index})">
@@ -222,6 +240,40 @@
                     </td>
                 </tr>`;
         });
+    }
+
+    // FUNGSI BARU UNTUK INPUT LANGSUNG DARI DASHBOARD
+    function addNewCar() {
+        const name = document.getElementById('new-name').value;
+        const year = document.getElementById('new-year').value;
+        const price = document.getElementById('new-price').value;
+        const img = document.getElementById('new-img').value;
+
+        if(!name || !price) {
+            alert("Nama dan Harga wajib diisi!");
+            return;
+        }
+
+        const newCar = {
+            name: name,
+            year: year,
+            price: price,
+            img: img || "https://via.placeholder.com/400x250?text=Gambar+Tidak+Tersedia",
+            fuel: "Bensin" 
+        };
+
+        let cars = JSON.parse(localStorage.getItem('car_stok')) || [];
+        cars.push(newCar);
+        localStorage.setItem('car_stok', JSON.stringify(cars));
+
+        // Bersihkan input
+        document.getElementById('new-name').value = "";
+        document.getElementById('new-year').value = "";
+        document.getElementById('new-price').value = "";
+        document.getElementById('new-img').value = "";
+
+        alert("Unit berhasil ditambahkan!");
+        loadCars(); // Refresh tabel tanpa reload halaman
     }
 
     function deleteCar(index) {
