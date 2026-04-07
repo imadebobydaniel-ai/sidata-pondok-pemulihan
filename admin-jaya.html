@@ -185,7 +185,7 @@
             <div id="main-stats" class="page-section active">
                 <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 15px; margin-top: 25px;">
                     <div class="stat-card"><h3>Unit Ready</h3><p id="count-ready">0</p></div>
-                    <div class="stat-card"><h3>Visit</h3><p>1.2k</p></div>
+                    <div class="stat-card"><h3>Visit</h3><p id="count-visit">0</p></div>
                 </div>
             </div>
 
@@ -271,9 +271,10 @@
         loadCars();
     }
 
+    // FUNGSI LOAD CARS (DI UPDATE UNTUK DASHBOARD)
     function loadCars() {
         const tbody = document.getElementById('car-table-body');
-        let cars = JSON.parse(localStorage.getItem('car_stok')) || [{name: 'Porsche 911', price: '2.45M'}];
+        let cars = JSON.parse(localStorage.getItem('car_stok')) || [];
         tbody.innerHTML = "";
         cars.forEach((car, i) => {
             tbody.innerHTML += `<tr>
@@ -285,7 +286,10 @@
                 </td>
             </tr>`;
         });
-        document.getElementById('count-ready').innerText = cars.length;
+        
+        // Update angka di Dashboard
+        const countElement = document.getElementById('count-ready');
+        if(countElement) countElement.innerText = cars.length;
     }
 
     function deleteCar(i) {
@@ -346,13 +350,31 @@
         loadBotKnowledge();
     }
 
-    function initData() { loadCars(); loadBotKnowledge(); }
+    // FUNGSI LOAD VISITS (TAMBAHAN BARU)
+    function loadVisits() {
+        let visits = localStorage.getItem('visitor_count') || "0";
+        const visitElement = document.getElementById('count-visit');
+        if(visitElement) {
+            let num = parseInt(visits);
+            let displayVisit = num >= 1000 ? (num/1000).toFixed(1) + 'k' : num;
+            visitElement.innerText = displayVisit;
+        }
+    }
 
-    window.onload = () => { if(sessionStorage.getItem("logged")) { 
-        document.getElementById('login-overlay').style.display = 'none'; 
-        document.getElementById('dashboard').classList.add('active'); 
-        initData(); 
-    }};
+    // INIT DATA (DI UPDATE)
+    function initData() { 
+        loadCars(); 
+        loadBotKnowledge(); 
+        loadVisits(); 
+    }
+
+    window.onload = () => { 
+        if(sessionStorage.getItem("logged")) { 
+            document.getElementById('login-overlay').style.display = 'none'; 
+            document.getElementById('dashboard').classList.add('active'); 
+            initData(); 
+        }
+    };
 </script>
 </body>
 </html>
