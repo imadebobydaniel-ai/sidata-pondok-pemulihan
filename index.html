@@ -246,7 +246,7 @@
         container.innerHTML = carsData.map((car, index) => `
             <div class="car-card" onclick="openLightbox(${index})">
                 <div class="img-wrapper">
-                    <img src="${car.img || 'https://via.placeholder.com/400x250?text=No+Image'}" alt="${car.name}">
+                    <img src="${car.img && car.img.startsWith('data:image') ? car.img : 'https://via.placeholder.com/400x250?text=Gambar+Tidak+Tersedia'}" alt="${car.name}">
                 </div>
                 <div class="info">
                     <h3>${car.name}</h3>
@@ -282,7 +282,8 @@
 
     function updateLightbox() {
         const car = carsData[currentIndex];
-        document.getElementById('lightbox-img').src = car.img || '';
+        const imgPath = car.img && car.img.startsWith('data:image') ? car.img : 'https://via.placeholder.com/400x250?text=Gambar+Tidak+Tersedia';
+        document.getElementById('lightbox-img').src = imgPath;
         document.getElementById('lb-title').innerText = car.name;
         document.getElementById('lb-price').innerText = "Rp " + car.price;
     }
@@ -298,7 +299,6 @@
         const body = document.getElementById('chatBody');
         if (!input.value.trim()) return;
 
-        // User Message
         const uDiv = document.createElement('div');
         uDiv.className = 'msg user-msg';
         uDiv.innerText = input.value;
@@ -308,7 +308,6 @@
         input.value = "";
         body.scrollTop = body.scrollHeight;
 
-        // Bot Response
         setTimeout(() => {
             const bDiv = document.createElement('div');
             bDiv.className = 'msg bot-msg';
@@ -325,7 +324,6 @@
     // INITIALIZE
     window.onload = () => {
         loadKatalog();
-        // Update Visitor Count
         let v = parseInt(localStorage.getItem('visitor_count') || "1200");
         localStorage.setItem('visitor_count', v + 1);
     };
