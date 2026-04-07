@@ -52,6 +52,47 @@
         .btn-edit { color: var(--gold); background: none; border: 1px solid var(--gold); padding: 6px 10px; border-radius: 6px; cursor: pointer; }
         .btn-delete { color: #ef4444; background: none; border: 1px solid #ef4444; padding: 6px 10px; border-radius: 6px; cursor: pointer; margin-left: 5px; }
 
+        /* --- KARTU TAMBAH UNIT CATALOG --- */
+        .card-add-catalog {
+            background: #1a1a1a;
+            border: 1px dashed var(--gold);
+            border-radius: 10px;
+            padding: 20px;
+            margin-top: 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            cursor: pointer;
+            transition: 0.3s ease;
+        }
+
+        .card-add-catalog:hover {
+            background: #252525;
+            transform: translateY(-3px);
+            border-style: solid;
+        }
+
+        .add-content {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .add-content i {
+            font-size: 24px;
+            color: var(--gold);
+        }
+
+        .add-content span {
+            font-size: 16px;
+            font-weight: bold;
+            color: #fff;
+        }
+
+        .card-add-catalog .fa-chevron-right {
+            color: #555;
+        }
+
         /* Mobile */
         @media (max-width: 992px) {
             .sidebar { transform: translateX(-100%); }
@@ -95,7 +136,7 @@
             <div class="admin-section">
                 <div class="header-action">
                     <h3 style="color: var(--gold); margin:0;">Katalog Stok Unit</h3>
-                    <a href="tambah-unit.html" class="btn-primary"><i class="fas fa-plus"></i> Tambah Unit Untuk Display Utama</a>
+                    <a href="tambah-unit.html" class="btn-primary"><i class="fas fa-plus"></i> Display Utama</a>
                 </div>
 
                 <table class="custom-table">
@@ -109,6 +150,14 @@
                     </thead>
                     <tbody id="car-table-body"></tbody>
                 </table>
+
+                <div class="card-add-catalog" onclick="location.href='tambah-unit.html'">
+                    <div class="add-content">
+                        <i class="fas fa-plus-circle"></i>
+                        <span>Tambah Unit Untuk Catalog</span>
+                    </div>
+                    <i class="fas fa-chevron-right"></i>
+                </div>
             </div>
         </div>
 
@@ -116,7 +165,7 @@
             <h1>Pengaturan Robot AI</h1>
             <div class="admin-section">
                 <p>Kelola portal asisten pintar Jaya Mobil di sini.</p>
-                </div>
+            </div>
         </div>
     </main>
 </div>
@@ -130,6 +179,8 @@
             document.getElementById('dashboard').classList.add('active');
             sessionStorage.setItem("logged", "true");
             loadCars();
+        } else {
+            alert("Username atau Password salah!");
         }
     }
 
