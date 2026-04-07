@@ -34,7 +34,6 @@
         .logo-container { display: flex; align-items: center; gap: 12px; }
         .logo-container img { height: 50px; border-radius: 5px; }
 
-        /* --- Efek Menu Dinamis 3D --- */
         .nav-links { 
             display: flex; 
             gap: 25px; 
@@ -136,7 +135,6 @@
         .car-price { color: var(--gold); font-size: 1.5rem; font-weight: bold; margin: 10px 0; }
         .car-specs { display: flex; gap: 15px; font-size: 0.9rem; color: #888; margin-bottom: 20px; }
 
-        /* Tombol Koleksi Hero */
         .btn-collection {
             display: inline-block;
             text-align: center;
@@ -157,6 +155,89 @@
             box-shadow: 0 8px 25px rgba(212, 175, 55, 0.5);
         }
 
+        /* --- Styling Chatbot --- */
+        .chat-launcher {
+            position: fixed;
+            bottom: 30px;
+            right: 30px;
+            width: 60px;
+            height: 60px;
+            background: var(--gold);
+            border-radius: 50%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            cursor: pointer;
+            box-shadow: 0 5px 20px rgba(212, 175, 55, 0.4);
+            z-index: 3000;
+            transition: 0.3s;
+        }
+
+        .chat-launcher:hover { transform: scale(1.1); }
+
+        .chat-window {
+            position: fixed;
+            bottom: 100px;
+            right: 30px;
+            width: 350px;
+            height: 450px;
+            background: #111;
+            border: 1px solid var(--gold);
+            border-radius: 20px;
+            display: none;
+            flex-direction: column;
+            overflow: hidden;
+            z-index: 3000;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.8);
+        }
+
+        .chat-header {
+            background: var(--gold);
+            padding: 15px;
+            color: black;
+            font-weight: bold;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .chat-body {
+            flex: 1;
+            padding: 15px;
+            overflow-y: auto;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .msg {
+            padding: 10px 15px;
+            border-radius: 15px;
+            max-width: 80%;
+            font-size: 14px;
+            line-height: 1.4;
+        }
+
+        .bot-msg { background: #222; color: white; align-self: flex-start; border-bottom-left-radius: 2px; }
+        .user-msg { background: var(--gold); color: black; align-self: flex-end; border-bottom-right-radius: 2px; }
+
+        .chat-footer {
+            padding: 15px;
+            border-top: 1px solid #333;
+            display: flex;
+            gap: 10px;
+        }
+
+        .chat-footer input {
+            flex: 1;
+            background: #222;
+            border: none;
+            padding: 10px;
+            color: white;
+            border-radius: 10px;
+            outline: none;
+        }
+
         footer {
             padding: 50px 5%;
             background: #050505;
@@ -174,7 +255,8 @@
     </div>
     <nav class="nav-links">
         <a href="#">Beranda</a>
-        <a href="katalog.html">Katalog</a> <a href="#">Tentang Kami</a> 
+        <a href="katalog.html">Katalog</a> 
+        <a href="#">Tentang Kami</a> 
         <a href="#kontak">Hubungi Kami</a>
         <a href="admin-jaya.html" class="btn-admin-login"><i class="fas fa-user-shield"></i> LOGIN ADMIN</a>
     </nav>
@@ -208,6 +290,75 @@
 <footer>
     <p>&copy; 2026 COPYRIGHT BY. IGEDE YASA JAYA Jual Beli Mobil Second. Kepuasan Anda Prioritas Kami.</p>
 </footer>
+
+<div class="chat-launcher" onclick="toggleChat()">
+    <i class="fas fa-robot" style="font-size: 24px; color: black;"></i>
+</div>
+
+<div class="chat-window" id="chatWindow">
+    <div class="chat-header">
+        <span><i class="fas fa-robot"></i> JAYA AI Assistant</span>
+        <span onclick="toggleChat()" style="cursor:pointer; font-size: 20px;">&times;</span>
+    </div>
+    <div class="chat-body" id="chatBody">
+        <div class="msg bot-msg">Halo! Saya asisten virtual JAYA MOBIL. Ada yang bisa saya bantu terkait koleksi mobil kami?</div>
+    </div>
+    <div class="chat-footer">
+        <input type="text" id="userInput" placeholder="Tanya sesuatu..." onkeypress="handleKeyPress(event)">
+        <button onclick="sendMessage()" style="background:var(--gold); border:none; padding:10px 15px; border-radius:10px; cursor:pointer;">
+            <i class="fas fa-paper-plane"></i>
+        </button>
+    </div>
+</div>
+
+<script>
+    function toggleChat() {
+        const chat = document.getElementById('chatWindow');
+        chat.style.display = chat.style.display === 'flex' ? 'none' : 'flex';
+    }
+
+    function handleKeyPress(e) {
+        if (e.key === 'Enter') sendMessage();
+    }
+
+    function sendMessage() {
+        const input = document.getElementById('userInput');
+        const chatBody = document.getElementById('chatBody');
+        
+        if (input.value.trim() === "") return;
+
+        // Pesan User
+        const userDiv = document.createElement('div');
+        userDiv.className = 'msg user-msg';
+        userDiv.innerText = input.value;
+        chatBody.appendChild(userDiv);
+
+        const message = input.value.toLowerCase();
+        input.value = "";
+
+        // Simulasi Berpikir Robot
+        setTimeout(() => {
+            const botDiv = document.createElement('div');
+            botDiv.className = 'msg bot-msg';
+            
+            // Logika Jawaban Sederhana
+            if (message.includes("harga")) {
+                botDiv.innerText = "Harga koleksi kami bervariasi mulai dari Rp 150 Juta hingga unit premium miliaran rupiah. Anda bisa cek di menu Katalog.";
+            } else if (message.includes("sedan")) {
+                botDiv.innerText = "Kami memiliki beberapa unit sedan mewah seperti Porsche 911 dan beberapa unit BMW. Cek kategori 'Sedan' ya!";
+            } else if (message.includes("lokasi") || message.includes("alamat")) {
+                botDiv.innerText = "Showroom kami berlokasi di Jayapura. Silakan hubungi WA kami untuk share lokasi tepatnya.";
+            } else if (message.includes("wa") || message.includes("kontak")) {
+                botDiv.innerText = "Anda bisa menghubungi admin kami di nomor WhatsApp yang tertera di menu 'Hubungi Kami'.";
+            } else {
+                botDiv.innerText = "Maaf, saya masih belajar. Bisa hubungi admin langsung untuk informasi lebih detail?";
+            }
+
+            chatBody.appendChild(botDiv);
+            chatBody.scrollTop = chatBody.scrollHeight;
+        }, 800);
+    }
+</script>
 
 </body>
 </html>
