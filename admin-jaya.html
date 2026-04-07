@@ -2,61 +2,140 @@
 <html lang="id">
 <head>
     <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Admin Panel - JAYA MOBIL</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <style>
-        body { background: #121212; color: white; font-family: sans-serif; padding: 40px; }
-        .dashboard-header { display: flex; justify-content: space-between; align-items: center; border-bottom: 2px solid #D4AF37; padding-bottom: 20px; }
-        .card-container { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 20px; margin-top: 30px; }
-        .stat-card { background: #1e1e1e; padding: 20px; border-radius: 10px; border-left: 5px solid #D4AF37; }
-        table { width: 100%; margin-top: 40px; border-collapse: collapse; background: #1e1e1e; border-radius: 10px; overflow: hidden; }
-        th { background: #D4AF37; color: black; padding: 15px; text-align: left; }
-        td { padding: 15px; border-bottom: 1px solid #333; }
-        .btn-add { background: #22c55e; color: white; padding: 10px 20px; border: none; border-radius: 5px; cursor: pointer; font-weight: bold; }
+        :root { --gold: #D4AF37; --dark-card: #1e1e1e; --bg: #121212; }
+        body { background: var(--bg); color: white; font-family: 'Segoe UI', sans-serif; margin: 0; }
+
+        /* Login Overlay */
+        #login-overlay {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0,0,0,0.95); z-index: 9999;
+            display: flex; justify-content: center; align-items: center;
+        }
+        .login-box {
+            background: var(--dark-card); padding: 40px; border-radius: 15px;
+            border: 1px solid var(--gold); text-align: center; width: 350px;
+        }
+        .login-box img { height: 60px; margin-bottom: 20px; }
+        .login-box input {
+            width: 100%; padding: 12px; margin: 10px 0; border-radius: 5px;
+            border: 1px solid #444; background: #000; color: white;
+        }
+        .btn-login {
+            width: 100%; padding: 12px; background: var(--gold); border: none;
+            color: black; font-weight: bold; border-radius: 5px; cursor: pointer; margin-top: 10px;
+        }
+
+        /* Dashboard Styles */
+        .admin-content { padding: 40px; opacity: 0; pointer-events: none; transition: 0.5s; }
+        .admin-content.active { opacity: 1; pointer-events: auto; }
+        
+        .dashboard-header { display: flex; justify-content: space-between; align-items: center; border-bottom: 2px solid var(--gold); padding-bottom: 20px; }
+        .card-container { display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 20px; margin-top: 30px; }
+        .stat-card { background: var(--dark-card); padding: 25px; border-radius: 12px; border-left: 6px solid var(--gold); box-shadow: 0 4px 15px rgba(0,0,0,0.3); }
+        .stat-card h3 { color: #888; font-size: 0.9rem; text-transform: uppercase; }
+        .stat-card p { font-size: 2rem; font-weight: bold; margin: 10px 0 0; color: var(--gold); }
+
+        table { width: 100%; margin-top: 40px; border-collapse: collapse; background: var(--dark-card); border-radius: 12px; overflow: hidden; }
+        th { background: var(--gold); color: black; padding: 18px; text-align: left; }
+        td { padding: 18px; border-bottom: 1px solid #333; }
+        .btn-add { background: #22c55e; color: white; padding: 12px 25px; border: none; border-radius: 8px; cursor: pointer; font-weight: bold; transition: 0.3s; }
+        .btn-add:hover { background: #16a34a; transform: scale(1.05); }
+        .status-badge { background: rgba(34, 197, 94, 0.2); color: #22c55e; padding: 5px 12px; border-radius: 20px; font-size: 0.8rem; font-weight: bold; }
     </style>
 </head>
 <body>
 
-<div class="dashboard-header">
-    <h1><i class="fas fa-tools"></i> Dashboard Admin JAYA</h1>
-    <a href="index.html" style="color: #D4AF37; text-decoration: none;">Kembali ke Website</a>
+<div id="login-overlay">
+    <div class="login-box">
+        <img src="logo-jaya.png" alt="Logo">
+        <h2 style="color: var(--gold); margin-bottom: 20px;">JAYA ADMIN</h2>
+        <input type="text" id="username" placeholder="Username">
+        <input type="password" id="password" placeholder="Password">
+        <button class="btn-login" onclick="checkLogin()">MASUK KE PANEL</button>
+        <p id="error-msg" style="color: #ef4444; font-size: 0.8rem; margin-top: 15px; display: none;">Username atau Password salah!</p>
+    </div>
 </div>
 
-<div class="card-container">
-    <div class="stat-card"><h3>Total Unit</h3><p>45 Mobil</p></div>
-    <div class="stat-card"><h3>Unit Terjual</h3><p>12 Mobil</p></div>
-    <div class="stat-card"><h3>Pesan Masuk</h3><p>8 Baru</p></div>
+<div class="admin-content" id="dashboard">
+    <div class="dashboard-header">
+        <h1><i class="fas fa-chart-line"></i> Dashboard JAYA MOBIL</h1>
+        <div style="display: flex; gap: 15px;">
+            <a href="index.html" style="color: var(--gold); text-decoration: none; padding: 10px;"><i class="fas fa-external-link-alt"></i> Lihat Web</a>
+            <button onclick="logout()" style="background: #ef4444; border:none; color:white; padding: 10px 15px; border-radius: 5px; cursor:pointer;">Keluar</button>
+        </div>
+    </div>
+
+    <div class="card-container">
+        <div class="stat-card"><h3>Unit Ready</h3><p>45</p></div>
+        <div class="stat-card"><h3>Unit Terjual</h3><p>12</p></div>
+        <div class="stat-card"><h3>Total Pengunjung</h3><p>1.284</p></div>
+    </div>
+
+    <div style="margin-top: 40px; display: flex; justify-content: space-between; align-items: center;">
+        <h2>Manajemen Stok Mobil</h2>
+        <button class="btn-add"><i class="fas fa-plus"></i> Tambah Unit Baru</button>
+    </div>
+
+    <table>
+        <thead>
+            <tr>
+                <th>No</th>
+                <th>Mobil</th>
+                <th>Tahun</th>
+                <th>Harga</th>
+                <th>Status</th>
+                <th>Aksi</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr>
+                <td>1</td>
+                <td><strong>Porsche 911 Carrera</strong></td>
+                <td>2021</td>
+                <td>Rp 2.450.000.000</td>
+                <td><span class="status-badge">Available</span></td>
+                <td>
+                    <button style="background: #3b82f6; color: white; border:none; padding: 8px 12px; border-radius: 5px; cursor:pointer;"><i class="fas fa-edit"></i></button>
+                    <button style="background: #ef4444; color: white; border:none; padding: 8px 12px; border-radius: 5px; cursor:pointer;"><i class="fas fa-trash"></i></button>
+                </td>
+            </tr>
+        </tbody>
+    </table>
 </div>
 
-<div style="margin-top: 40px;">
-    <button class="btn-add"><i class="fas fa-plus"></i> Tambah Mobil Baru</button>
-</div>
+<script>
+    function checkLogin() {
+        const user = document.getElementById('username').value;
+        const pass = document.getElementById('password').value;
+        const error = document.getElementById('error-msg');
 
-<table>
-    <thead>
-        <tr>
-            <th>No</th>
-            <th>Nama Mobil</th>
-            <th>Tahun</th>
-            <th>Harga</th>
-            <th>Status</th>
-            <th>Aksi</th>
-        </tr>
-    </thead>
-    <tbody>
-        <tr>
-            <td>1</td>
-            <td>Porsche 911 Carrera</td>
-            <td>2021</td>
-            <td>Rp 2.450M</td>
-            <td><span style="color: #22c55e;">Tersedia</span></td>
-            <td>
-                <button style="background: #3b82f6; color: white; border:none; padding: 5px 10px; border-radius: 3px;">Edit</button>
-                <button style="background: #ef4444; color: white; border:none; padding: 5px 10px; border-radius: 3px;">Hapus</button>
-            </td>
-        </tr>
-    </tbody>
-</table>
+        // Sesuai permintaan Anda: admin / jaya2026
+        if(user === "admin" && pass === "jaya2026") {
+            document.getElementById('login-overlay').style.display = 'none';
+            document.getElementById('dashboard').classList.add('active');
+            sessionStorage.setItem("adminLoggedIn", "true");
+        } else {
+            error.style.display = 'block';
+        }
+    }
+
+    function logout() {
+        sessionStorage.removeItem("adminLoggedIn");
+        location.reload();
+    }
+
+    // Cek status login saat halaman dibuka
+    window.onload = () => {
+        if(sessionStorage.getItem("adminLoggedIn") === "true") {
+            document.getElementById('login-overlay').style.display = 'none';
+            document.getElementById('dashboard').classList.add('active');
+        }
+    };
+</script>
 
 </body>
 </html>
