@@ -195,7 +195,7 @@
 </section>
 
 <footer id="kontak">
-    <p>&copy; 2026 JAYA MOBIL | COPYRIGHT BY. Imade Boby| All Rights Reserved.</p>
+    <p>&copy; 2026 JAYA MOBIL | COPYRIGHT BY. Imade Boby | All Rights Reserved.</p>
 </footer>
 
 <div id="lightbox">
@@ -210,7 +210,7 @@
 </div>
 
 <div class="chat-launcher" onclick="toggleChat()">
-    <img src="asisten_ai.png" alt="Asisten">
+    <img src="asisten_ai.png" alt="Asisten" onerror="this.src='https://cdn-icons-png.flaticon.com/512/4712/4712035.png'">
 </div>
 
 <div class="chat-window" id="chatWindow">
@@ -230,37 +230,48 @@
 </div>
 
 <script>
+    // 1. VARIABEL GLOBAL
     let carsData = [];
     let currentIndex = 0;
 
-    // 1. LOAD DATA KATALOG
+    // 2. FUNGSI LOAD KATALOG
     function loadKatalog() {
         carsData = JSON.parse(localStorage.getItem('car_stok')) || [];
         const container = document.getElementById('main-catalog');
 
-        if(carsData.length === 0) {
-            container.innerHTML = "<p style='text-align:center; grid-column: 1/-1;'>Katalog sedang diperbarui...</p>";
+        if (!container) return;
+
+        if (carsData.length === 0) {
+            container.innerHTML = "<p style='text-align:center; width:100%; color:#888;'>Katalog Unit Belum Tersedia.</p>";
             return;
         }
 
-        container.innerHTML = carsData.map((car, index) => `
-            <div class="car-card" onclick="openLightbox(${index})">
-                <div class="img-wrapper">
-                    <img src="${car.img && car.img.startsWith('data:image') ? car.img : 'https://via.placeholder.com/400x250?text=Gambar+Tidak+Tersedia'}" alt="${car.name}">
-                </div>
-                <div class="info">
-                    <h3>${car.name}</h3>
-                    <div class="price">Rp ${car.price}</div>
-                    <div class="spec">
-                        <span><i class="far fa-calendar-alt"></i> ${car.year || '2022'}</span>
-                        <span><i class="fas fa-gas-pump"></i> ${car.fuel || 'Bensin'}</span>
+        container.innerHTML = carsData.map((car, index) => {
+            // Cek apakah gambar valid Base64
+            const isBase64 = car.img && car.img.startsWith('data:image');
+            const displayImg = isBase64 ? car.img : 'https://placehold.co/400x250?text=Foto+Tidak+Tersedia';
+
+            return `
+                <div class="car-card" onclick="openLightbox(${index})">
+                    <div class="img-wrapper">
+                        <img src="${displayImg}" 
+                             alt="${car.name}" 
+                             onerror="this.src='https://placehold.co/400x250?text=Gagal+Memuat+Gambar'">
+                    </div>
+                    <div class="info">
+                        <h3>${car.name}</h3>
+                        <div class="price">Rp ${car.price}</div>
+                        <div class="spec">
+                            <span><i class="far fa-calendar-alt"></i> ${car.year || '2022'}</span>
+                            <span><i class="fas fa-gas-pump"></i> ${car.fuel || 'Bensin'}</span>
+                        </div>
                     </div>
                 </div>
-            </div>
-        `).join('');
+            `;
+        }).join('');
     }
 
-    // 2. LIGHTBOX LOGIC
+    // 3. FUNGSI LIGHTBOX (POPUP)
     function openLightbox(index) {
         currentIndex = index;
         updateLightbox();
@@ -274,6 +285,7 @@
     }
 
     function changeSlide(dir) {
+        if (carsData.length === 0) return;
         currentIndex += dir;
         if (currentIndex >= carsData.length) currentIndex = 0;
         if (currentIndex < 0) currentIndex = carsData.length - 1;
@@ -282,13 +294,16 @@
 
     function updateLightbox() {
         const car = carsData[currentIndex];
-        const imgPath = car.img && car.img.startsWith('data:image') ? car.img : 'https://via.placeholder.com/400x250?text=Gambar+Tidak+Tersedia';
+        if (!car) return;
+        const isBase64 = car.img && car.img.startsWith('data:image');
+        const imgPath = isBase64 ? car.img : 'https://placehold.co/400x250?text=Gambar+Tidak+Tersedia';
+        
         document.getElementById('lightbox-img').src = imgPath;
         document.getElementById('lb-title').innerText = car.name;
         document.getElementById('lb-price').innerText = "Rp " + car.price;
     }
 
-    // 3. ASISTEN AI LOGIC
+    // 4. ASISTEN AI (CHATBOT)
     function toggleChat() {
         const chat = document.getElementById('chatWindow');
         chat.style.display = (chat.style.display === 'flex') ? 'none' : 'flex';
@@ -312,18 +327,19 @@
             const bDiv = document.createElement('div');
             bDiv.className = 'msg bot-msg';
             
-            if (val.includes("harga")) bDiv.innerText = "Harga unit kami bervariasi. Paling terjangkau mulai dari Rp 150 Juta.";
-            else if (val.includes("lokasi")) bDiv.innerText = "Showroom kami berada di Jayapura, Papua. Silahkan mampir!";
-            else bDiv.innerText = "Pesan Anda telah kami terima. Tim marketing kami akan segera merespon.";
+            if (val.includes("harga")) bDiv.innerText = "Harga unit di JAYA MOBIL sangat kompetitif, silakan klik pada unit untuk detailnya.";
+            else if (val.includes("lokasi")) bDiv.innerText = "Showroom kami berlokasi di Jayapura, Papua.";
+            else bDiv.innerText = "Terima kasih! Tim marketing kami akan segera menghubungi Anda.";
 
             body.appendChild(bDiv);
             body.scrollTop = body.scrollHeight;
         }, 800);
     }
 
-    // INITIALIZE
+    // 5. INISIALISASI SAAT HALAMAN DIBUKA
     window.onload = () => {
         loadKatalog();
+        // Counter pengunjung sederhana
         let v = parseInt(localStorage.getItem('visitor_count') || "1200");
         localStorage.setItem('visitor_count', v + 1);
     };
