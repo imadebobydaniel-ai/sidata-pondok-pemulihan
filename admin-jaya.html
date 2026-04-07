@@ -7,13 +7,8 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <style>
         :root { --gold: #D4AF37; --dark-card: #1e1e1e; --bg: #121212; --sidebar-w: 260px; }
-        
         * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
-        
-        body { 
-           background: var(--bg); color: white; font-family: 'Segoe UI', Roboto, sans-serif; 
-            margin: 0; overflow-x: hidden; 
-        }
+        body { background: var(--bg); color: white; font-family: 'Segoe UI', sans-serif; margin: 0; overflow-x: hidden; }
 
         /* --- LOGIN OVERLAY --- */
         #login-overlay {
@@ -24,7 +19,6 @@
         .login-box {
             background: var(--dark-card); padding: 30px; border-radius: 20px;
             border: 1px solid rgba(212, 175, 55, 0.3); text-align: center; width: 100%; max-width: 380px;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.5);
         }
         .login-box input {
             width: 100%; padding: 15px; margin: 10px 0; border-radius: 10px;
@@ -32,243 +26,95 @@
         }
         .btn-login {
             width: 100%; padding: 15px; background: var(--gold); border: none;
-            color: black; font-weight: bold; border-radius: 10px; cursor: pointer; margin-top: 10px;
-            transition: 0.3s;
+            color: black; font-weight: bold; border-radius: 10px; cursor: pointer; transition: 0.3s;
         }
 
-        /* --- LAYOUT STRUCTURE --- */
+        /* --- LAYOUT --- */
         .admin-content { opacity: 0; display: none; transition: 0.5s; }
         .admin-content.active { opacity: 1; display: block; }
-        
-        .mobile-nav {
-            display: none; position: fixed; top: 0; width: 100%; height: 60px;
-            background: #000; border-bottom: 1px solid #333; z-index: 999;
-            padding: 0 20px; align-items: center; justify-content: space-between;
-        }
-
         .sidebar { 
             width: var(--sidebar-w); background: #000; border-right: 1px solid #222; 
             padding: 20px; display: flex; flex-direction: column; gap: 8px;
-            position: fixed; height: 100vh; z-index: 1000; transition: 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+            position: fixed; height: 100vh; z-index: 1000; transition: 0.4s;
         }
-
-        .menu-item {
-            padding: 14px 18px; color: #999; text-decoration: none; border-radius: 12px;
-            cursor: pointer; transition: 0.3s; display: flex; align-items: center; gap: 12px; font-weight: 500;
-        }
-        .menu-item:hover { color: var(--gold); background: rgba(212, 175, 55, 0.05); }
-        .menu-item.active { background: var(--gold); color: black; box-shadow: 0 4px 15px rgba(212, 175, 55, 0.3); }
-
         .main-panel { margin-left: var(--sidebar-w); padding: 40px; transition: 0.4s; }
-
-        /* --- PAGE SECTIONS --- */
-        .page-section { display: none; }
-        .page-section.active { display: block; animation: slideUp 0.4s ease-out; }
-        @keyframes slideUp { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
+        .menu-item { padding: 14px 18px; color: #999; text-decoration: none; border-radius: 12px; cursor: pointer; display: flex; align-items: center; gap: 12px; }
+        .menu-item.active { background: var(--gold); color: black; font-weight: bold; }
 
         /* --- UI ELEMENTS --- */
-        .dashboard-header { margin-bottom: 30px; }
-        .card-container { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 15px; }
-        .stat-card { 
-            background: var(--dark-card); padding: 20px; border-radius: 16px; 
-            border: 1px solid #222; position: relative; overflow: hidden;
-        }
-        .stat-card::after { content: ''; position: absolute; left: 0; top: 0; height: 100%; width: 4px; background: var(--gold); }
-        .stat-card h3 { color: #666; font-size: 0.8rem; text-transform: uppercase; margin: 0; }
-        .stat-card p { font-size: 1.8rem; font-weight: bold; margin: 8px 0 0; color: #fff; }
-
-        .admin-section { background: var(--dark-card); padding: 20px; border-radius: 16px; border: 1px solid #222; }
-        
-        .form-row { 
-            display: flex; gap: 15px; margin-bottom: 20px; background: #161616; 
-            padding: 20px; border-radius: 12px; align-items: flex-end; 
-        }
-        .input-group { flex: 1; }
-        .input-group label { display: block; margin-bottom: 8px; color: var(--gold); font-size: 0.85rem; font-weight: bold; }
-        .input-group input { 
-            width: 100%; padding: 12px; background: #000; border: 1px solid #333; 
-            color: white; border-radius: 8px; outline: none; transition: 0.3s;
-        }
-        .input-group input:focus { border-color: var(--gold); }
-
-        /* --- TABLE REPOSITORY --- */
-        .custom-table { width: 100%; border-collapse: collapse; margin-top: 10px; }
-        .custom-table th { text-align: left; padding: 15px; color: var(--gold); border-bottom: 2px solid #222; font-size: 0.9rem; }
+        .admin-section { background: var(--dark-card); padding: 25px; border-radius: 16px; border: 1px solid #222; }
+        .header-action { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; }
+        .custom-table { width: 100%; border-collapse: collapse; }
+        .custom-table th { text-align: left; padding: 15px; color: var(--gold); border-bottom: 2px solid #222; }
         .custom-table td { padding: 15px; border-bottom: 1px solid #222; color: #ccc; }
 
-        .btn-add { background: #22c55e; color: white; padding: 12px 24px; border: none; border-radius: 10px; cursor: pointer; font-weight: 600; }
-        .btn-edit { background: rgba(212, 175, 55, 0.1); color: var(--gold); border: 1px solid var(--gold); padding: 8px; border-radius: 8px; cursor: pointer; margin-right: 5px; }
-        .btn-delete { background: rgba(239, 68, 68, 0.1); color: #ef4444; border: 1px solid #ef4444; padding: 8px; border-radius: 8px; cursor: pointer; }
+        .btn-primary { background: var(--gold); color: black; padding: 12px 20px; border: none; border-radius: 10px; cursor: pointer; font-weight: bold; text-decoration: none; display: inline-block; }
+        .btn-edit { color: var(--gold); background: none; border: 1px solid var(--gold); padding: 6px 10px; border-radius: 6px; cursor: pointer; }
+        .btn-delete { color: #ef4444; background: none; border: 1px solid #ef4444; padding: 6px 10px; border-radius: 6px; cursor: pointer; margin-left: 5px; }
 
-        /* --- RESPONSIVE MOBILE --- */
+        /* Mobile */
         @media (max-width: 992px) {
-            .mobile-nav { display: flex; }
-            .sidebar { transform: translateX(-100%); width: 280px; }
-            .sidebar.open { transform: translateX(0); box-shadow: 20px 0 50px rgba(0,0,0,0.8); }
-            .main-panel { margin-left: 0; padding: 80px 20px 40px 20px; }
-            .form-row { flex-direction: column; align-items: stretch; }
-            .custom-table thead { display: none; }
-            .custom-table tr { 
-                display: block; background: #252525; margin-bottom: 15px; 
-                border-radius: 12px; padding: 10px; border: 1px solid #333;
-            }
-            .custom-table td { 
-                display: flex; justify-content: space-between; align-items: center; 
-                padding: 10px 15px; border-bottom: 1px solid #333; text-align: right;
-            }
-            .custom-table td::before { content: attr(data-label); font-weight: bold; color: var(--gold); text-align: left; }
-            .custom-table td:last-child { border-bottom: none; }
+            .sidebar { transform: translateX(-100%); }
+            .main-panel { margin-left: 0; padding: 20px; }
+            .sidebar.open { transform: translateX(0); }
         }
-
-        .overlay { 
-            display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; 
-            background: rgba(0,0,0,0.7); z-index: 999; backdrop-filter: blur(4px);
-        }
-        .overlay.active { display: block; }
     </style>
 </head>
 <body>
 
 <div id="login-overlay">
     <div class="login-box">
-        <h2 style="color: var(--gold); margin: 0 0 10px 0;">JAYA ADMIN</h2>
-        <p style="color: #666; font-size: 0.8rem; margin-bottom: 25px;">Enter credentials to manage showroom</p>
+        <h2 style="color: var(--gold);">JAYA ADMIN</h2>
         <input type="text" id="username" placeholder="Username">
         <input type="password" id="password" placeholder="Password">
-        <button class="btn-login" onclick="checkLogin()">MASUK KE PANEL</button>
-        <p id="error-msg" style="color: #ef4444; font-size: 0.8rem; margin-top: 15px; display: none;">Kredensial Salah!</p>
+        <button class="btn-login" onclick="checkLogin()">MASUK</button>
     </div>
 </div>
 
-<div class="overlay" id="sidebar-overlay" onclick="toggleSidebar()"></div>
-
 <div class="admin-content" id="dashboard">
-    <header class="mobile-nav">
-        <div onclick="toggleSidebar()" style="font-size: 1.5rem; color: var(--gold);"><i class="fas fa-bars"></i></div>
-        <div style="font-weight: bold; letter-spacing: 1px;">JAYA MOBIL</div>
-        <div style="color: var(--gold);"><i class="fas fa-user-circle"></i></div>
-    </header>
+    <nav class="sidebar" id="sidebar">
+        <div style="padding: 20px 0; text-align: center;">
+            <h2 style="color: var(--gold);">JAYA MOBIL</h2>
+        </div>
+        <div class="menu-item active" onclick="switchPage('main-stats', this)"><i class="fas fa-th-large"></i> Dashboard</div>
+        <div class="menu-item" onclick="switchPage('stok-mobil', this)"><i class="fas fa-car"></i> Manajemen Stok</div>
+        <div class="menu-item" onclick="logout()" style="color: #ef4444; margin-top: auto;"><i class="fas fa-power-off"></i> Keluar</div>
+    </nav>
 
-    <div class="admin-wrapper">
-        <nav class="sidebar" id="sidebar">
-            <div style="padding: 20px 10px 40px 10px; text-align: center;">
-                <h2 style="color: var(--gold); margin: 0; font-size: 1.4rem;">JAYA MOBIL</h2>
-                <span style="font-size: 0.6rem; color: #444; letter-spacing: 2px;">ADMINISTRATOR</span>
+    <main class="main-panel">
+        <div id="main-stats" class="page-section active">
+            <h1>Ringkasan Dashboard</h1>
+            <div class="admin-section">
+                <p>Selamat datang di panel kendali Jaya Mobil Jayapura.</p>
             </div>
-            
-            <div class="menu-item active" onclick="switchPage('main-stats', this)">
-                <i class="fas fa-th-large"></i> Dashboard
-            </div>
-            <div class="menu-item" onclick="switchPage('stok-mobil', this)">
-                <i class="fas fa-car"></i> Manajemen Stok
-            </div>
-            <div class="menu-item" onclick="switchPage('ai-setting', this)">
-                <i class="fas fa-robot"></i> Pengaturan AI
-            </div>
-            
-            <div style="margin-top: auto; padding-top: 20px; border-top: 1px solid #222;">
-                <div class="menu-item" onclick="logout()" style="color: #ef4444;">
-                    <i class="fas fa-power-off"></i> Keluar
+        </div>
+
+        <div id="stok-mobil" class="page-section" style="display:none;">
+            <div class="admin-section">
+                <div class="header-action">
+                    <h3 style="color: var(--gold); margin:0;">Katalog Stok Unit</h3>
+                    <a href="tambah-unit.html" class="btn-primary"><i class="fas fa-plus"></i> Tambah Unit Baru</a>
                 </div>
+
+                <table class="custom-table">
+                    <thead>
+                        <tr>
+                            <th>Unit Mobil</th>
+                            <th>Tahun</th>
+                            <th>Harga</th>
+                            <th>Aksi</th>
+                        </tr>
+                    </thead>
+                    <tbody id="car-table-body">
+                        </tbody>
+                </table>
             </div>
-        </nav>
-
-        <main class="main-panel">
-            <div class="dashboard-header">
-                <h1 id="page-title" style="margin: 0; font-size: 1.5rem;">Dashboard</h1>
-                <p style="color: #666; margin: 5px 0 0 0;">Ringkasan sistem Jaya Mobil hari ini.</p>
-            </div>
-
-            <div id="main-stats" class="page-section active">
-                <div class="card-container">
-                    <div class="stat-card"><h3>Unit Ready</h3><p id="stat-unit-ready">0</p></div>
-                    <div class="stat-card"><h3>Terjual</h3><p>12</p></div>
-                    <div class="stat-card"><h3>Visit</h3><p>1.2k</p></div>
-                </div>
-            </div>
-
-            <div id="stok-mobil" class="page-section">
-                <div class="admin-section">
-                    <h3 id="car-form-title" style="color: var(--gold); margin-top:0;">Tambah Unit Baru</h3>
-                    <div class="form-row">
-                        <input type="hidden" id="edit-index-car" value="-1">
-                        <div class="input-group">
-                            <label>Nama Mobil</label>
-                            <input type="text" id="mobil-nama" placeholder="Contoh: Porsche 911">
-                        </div>
-                        <div class="input-group">
-                            <label>Harga (Rp)</label>
-                            <input type="text" id="mobil-harga" placeholder="Contoh: 2.45M">
-                        </div>
-                        <button class="btn-add" id="btn-save-car" onclick="saveCarUnit()">Tambah</button>
-                    </div>
-
-                    <table class="custom-table">
-                        <thead>
-                            <tr>
-                                <th>Mobil</th>
-                                <th>Harga</th>
-                                <th>Aksi</th>
-                            </tr>
-                        </thead>
-                        <tbody id="car-table-body"></tbody>
-                    </table>
-                </div>
-            </div>
-
-            <div id="ai-setting" class="page-section">
-                <div class="admin-section">
-                    <h3 id="bot-form-title" style="color: var(--gold); margin-top:0;">Asisten AI</h3>
-                    <div class="form-row">
-                        <input type="hidden" id="edit-index-bot" value="-1">
-                        <div class="input-group">
-                            <label>Keyword</label>
-                            <input type="text" id="bot-keyword" placeholder="Contoh: harga">
-                        </div>
-                        <div class="input-group">
-                            <label>Jawaban</label>
-                            <input type="text" id="bot-response" placeholder="Respon bot...">
-                        </div>
-                        <button class="btn-add" id="btn-save-bot" onclick="saveBotKnowledge()">Simpan</button>
-                    </div>
-
-                    <table class="custom-table">
-                        <thead>
-                            <tr>
-                                <th>Keyword</th>
-                                <th>Jawaban</th>
-                                <th>Aksi</th>
-                            </tr>
-                        </thead>
-                        <tbody id="bot-table-body"></tbody>
-                    </table>
-                </div>
-            </div>
-        </main>
-    </div>
+        </div>
+    </main>
 </div>
 
 <script>
-    // --- UI LOGIC ---
-    function toggleSidebar() {
-        document.getElementById('sidebar').classList.toggle('open');
-        document.getElementById('sidebar-overlay').classList.toggle('active');
-    }
-
-    function switchPage(pageId, element) {
-        document.querySelectorAll('.page-section').forEach(p => p.classList.remove('active'));
-        document.querySelectorAll('.menu-item').forEach(m => m.classList.remove('active'));
-        
-        document.getElementById(pageId).classList.add('active');
-        element.classList.add('active');
-        
-        if(window.innerWidth <= 992) toggleSidebar();
-        
-        const titles = { 'main-stats': 'Dashboard', 'stok-mobil': 'Manajemen Stok', 'ai-setting': 'Pengaturan AI' };
-        document.getElementById('page-title').innerText = titles[pageId];
-    }
-
-    // --- AUTH ---
+    // Auth Logic
     function checkLogin() {
         const u = document.getElementById('username').value;
         const p = document.getElementById('password').value;
@@ -276,9 +122,7 @@
             document.getElementById('login-overlay').style.display = 'none';
             document.getElementById('dashboard').classList.add('active');
             sessionStorage.setItem("logged", "true");
-            initData();
-        } else {
-            document.getElementById('error-msg').style.display = 'block';
+            loadCars();
         }
     }
 
@@ -287,147 +131,60 @@
         location.reload();
     }
 
-    // --- CAR MANAGEMENT (INTEGRATED) ---
-    function saveCarUnit() {
-        const nama = document.getElementById('mobil-nama').value.trim();
-        const harga = document.getElementById('mobil-harga').value.trim();
-        const editIdx = parseInt(document.getElementById('edit-index-car').value);
+    // Page Switching
+    function switchPage(pageId, element) {
+        document.querySelectorAll('.page-section').forEach(p => p.style.display = 'none');
+        document.querySelectorAll('.menu-item').forEach(m => m.classList.remove('active'));
+        document.getElementById(pageId).style.display = 'block';
+        element.classList.add('active');
+    }
+
+    // Load Data Mobil
+    function loadCars() {
+        const tbody = document.getElementById('car-table-body');
+        // Mengambil data dari 'car_stok' (kunci yang sama dengan halaman tambah-unit)
+        let cars = JSON.parse(localStorage.getItem('car_stok')) || [];
         
-        if(!nama || !harga) {
-            alert("Mohon isi nama dan harga mobil");
+        tbody.innerHTML = "";
+        if(cars.length === 0) {
+            tbody.innerHTML = "<tr><td colspan='4' style='text-align:center;'>Belum ada unit di katalog.</td></tr>";
             return;
         }
 
-        // Logika 1: Jika sedang mode EDIT, simpan langsung di tabel ini
-        if(editIdx !== -1) {
-            let cars = JSON.parse(localStorage.getItem('car_data')) || [];
-            cars[editIdx] = { nama, harga };
-            localStorage.setItem('car_data', JSON.stringify(cars));
-            
-            // Reset Form
-            document.getElementById('edit-index-car').value = "-1";
-            document.getElementById('car-form-title').innerText = "Tambah Unit Baru";
-            document.getElementById('btn-save-car').innerText = "Tambah";
-            document.getElementById('mobil-nama').value = "";
-            document.getElementById('mobil-harga').value = "";
-            loadCars();
-        } 
-        // Logika 2: Jika mode TAMBAH BARU, oper ke halaman tambah-unit.html
-        else {
-            let tempUnit = { nama, harga };
-            localStorage.setItem('pending_unit', JSON.stringify(tempUnit));
-            window.location.href = 'tambah-unit.html';
-        }
-    }
-
-    function editCar(i) {
-        let cars = JSON.parse(localStorage.getItem('car_data'));
-        document.getElementById('mobil-nama').value = cars[i].nama;
-        document.getElementById('mobil-harga').value = cars[i].harga;
-        document.getElementById('edit-index-car').value = i;
-        document.getElementById('car-form-title').innerText = "Edit Unit Mobil";
-        document.getElementById('btn-save-car').innerText = "Update";
-    }
-
-    function loadCars() {
-        const tbody = document.getElementById('car-table-body');
-        let cars = JSON.parse(localStorage.getItem('car_data')) || [{nama: "Porsche 911", harga: "Rp 2.45M"}];
-        tbody.innerHTML = "";
         cars.forEach((car, index) => {
             tbody.innerHTML += `
                 <tr>
-                    <td data-label="Mobil"><strong>${car.nama}</strong></td>
-                    <td data-label="Harga">${car.harga}</td>
-                    <td data-label="Aksi">
-                        <button class="btn-edit" onclick="editCar(${index})"><i class="fas fa-edit"></i></button>
-                        <button class="btn-delete" onclick="deleteCar(${index})"><i class="fas fa-trash"></i></button>
+                    <td><strong>${car.name}</strong></td>
+                    <td>${car.year || '-'}</td>
+                    <td>Rp ${car.price}</td>
+                    <td>
+                        <button class="btn-edit" onclick="alert('Gunakan halaman tambah unit untuk input baru atau hubungi developer untuk edit database.')">
+                            <i class="fas fa-info-circle"></i>
+                        </button>
+                        <button class="btn-delete" onclick="deleteCar(${index})">
+                            <i class="fas fa-trash"></i>
+                        </button>
                     </td>
                 </tr>`;
         });
-        document.getElementById('stat-unit-ready').innerText = cars.length;
     }
 
-    function deleteCar(i) {
-        if(!confirm("Hapus unit ini?")) return;
-        let cars = JSON.parse(localStorage.getItem('car_data'));
-        cars.splice(i, 1);
-        localStorage.setItem('car_data', JSON.stringify(cars));
-        loadCars();
-    }
-
-    // --- AI LOGIC ---
-    function saveBotKnowledge() {
-        const kw = document.getElementById('bot-keyword').value.toLowerCase().trim();
-        const rs = document.getElementById('bot-response').value.trim();
-        const editIdx = parseInt(document.getElementById('edit-index-bot').value);
-        if(!kw || !rs) return;
-
-        let data = JSON.parse(localStorage.getItem('bot_data')) || [];
-        
-        if(editIdx === -1) {
-            data.push({ keyword: kw, response: rs });
-        } else {
-            data[editIdx] = { keyword: kw, response: rs };
-            document.getElementById('edit-index-bot').value = "-1";
-            document.getElementById('bot-form-title').innerText = "Asisten AI";
-            document.getElementById('btn-save-bot').innerText = "Simpan";
+    function deleteCar(index) {
+        if(confirm("Hapus unit ini dari katalog?")) {
+            let cars = JSON.parse(localStorage.getItem('car_stok'));
+            cars.splice(index, 1);
+            localStorage.setItem('car_stok', JSON.stringify(cars));
+            loadCars();
         }
-
-        localStorage.setItem('bot_data', JSON.stringify(data));
-        document.getElementById('bot-keyword').value = "";
-        document.getElementById('bot-response').value = "";
-        loadBotKnowledge();
-    }
-
-    function editKnowledge(i) {
-        let data = JSON.parse(localStorage.getItem('bot_data'));
-        document.getElementById('bot-keyword').value = data[i].keyword;
-        document.getElementById('bot-response').value = data[i].response;
-        document.getElementById('edit-index-bot').value = i;
-        document.getElementById('bot-form-title').innerText = "Edit Respon AI";
-        document.getElementById('btn-save-bot').innerText = "Update";
-    }
-
-    function loadBotKnowledge() {
-        const tbody = document.getElementById('bot-table-body');
-        let data = JSON.parse(localStorage.getItem('bot_data')) || [
-            { keyword: "harga", response: "Harga unit kami sangat bersaing, mulai dari 150 jutaan." },
-            { keyword: "lokasi", response: "Kami berlokasi di Jayapura, Papua." }
-        ];
-        tbody.innerHTML = "";
-        data.forEach((item, index) => {
-            tbody.innerHTML += `
-                <tr>
-                    <td data-label="Keyword"><code>${item.keyword}</code></td>
-                    <td data-label="Jawaban">${item.response}</td>
-                    <td data-label="Aksi">
-                        <button class="btn-edit" onclick="editKnowledge(${index})"><i class="fas fa-edit"></i></button>
-                        <button class="btn-delete" onclick="deleteKnowledge(${index})"><i class="fas fa-trash"></i></button>
-                    </td>
-                </tr>`;
-        });
-    }
-
-    function deleteKnowledge(i) {
-        if(!confirm("Hapus respon ini?")) return;
-        let data = JSON.parse(localStorage.getItem('bot_data'));
-        data.splice(i, 1);
-        localStorage.setItem('bot_data', JSON.stringify(data));
-        loadBotKnowledge();
-    }
-
-    function initData() {
-        loadCars();
-        loadBotKnowledge();
     }
 
     window.onload = () => {
         if(sessionStorage.getItem("logged")) {
             document.getElementById('login-overlay').style.display = 'none';
             document.getElementById('dashboard').classList.add('active');
-            initData();
+            loadCars();
         }
-    }
+    };
 </script>
 </body>
 </html>
